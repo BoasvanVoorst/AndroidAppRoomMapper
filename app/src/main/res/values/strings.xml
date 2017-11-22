@@ -14,4 +14,6 @@
     <string name="Start">Start</string>
     <string name="Stop">Stop</string>
     <string name="room">Room Name</string>
+    <string name="Connect">Connect</string>
+    <string name="save">Save</string>
 </resources>
