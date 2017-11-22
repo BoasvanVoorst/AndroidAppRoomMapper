@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">RoomMapper</string>
+    <string name="controlButton">Control</string>
+    <string name="mapButton">Map</string>
+    <string name="SettingsButton">Settings</string>
+    <string name="Bluetooth">Bluetooth</string>
+    <string name="Wifi">Wifi</string>
+    <string name="Port">Port:</string>
+    <string name="IP">IP:</string>
+    <string name="wakeScreen">Wake Screen </string>
+    <string name="OFF">OFF</string>
+    <string name="ON">ON</string>
+    <string name="Samples">Samples/S</string>
+    <string name="Start">Start</string>
+    <string name="Stop">Stop</string>
+    <string name="room">Room Name</string>
+</resources>

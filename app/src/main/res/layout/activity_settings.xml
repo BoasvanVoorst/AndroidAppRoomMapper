@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.jabo.jabo.roommapper.Settings">
+
+    <EditText
+        android:id="@+id/Port"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginTop="8dp"
+        android:ems="10"
+        android:inputType="number|phone"
+        android:maxLength="4"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintHorizontal_bias="0.126"
+        app:layout_constraintLeft_toRightOf="@+id/textView6"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.13" />
+
+    <EditText
+        android:id="@+id/IPaddress"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginTop="8dp"
+        android:ems="10"
+        android:inputType="number|phone"
+        android:maxLength="15"
+        android:maxLines="1"
+        android:selectAllOnFocus="true"
+        android:singleLine="false"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintHorizontal_bias="0.126"
+        app:layout_constraintLeft_toRightOf="@+id/textView6"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.017" />
+
+    <ToggleButton
+        android:id="@+id/wakescreenbutton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginTop="8dp"
+        android:text="@string/OFF"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.248" />
+
+    <TextView
+        android:id="@+id/textView5"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/wakeScreen"
+        android:layout_marginLeft="8dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginTop="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginBottom="8dp"
+        android:layout_marginRight="8dp"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintHorizontal_bias="0.097"
+        app:layout_constraintVertical_bias="0.261" />
+
+    <TextView
+        android:id="@+id/textView6"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginTop="8dp"
+        android:text="@string/Port"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintHorizontal_bias="0.082"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.146" />
+
+    <TextView
+        android:id="@+id/textView7"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/IP"
+        android:layout_marginLeft="8dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginTop="8dp"
+        android:layout_marginRight="8dp"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginBottom="8dp"
+        app:layout_constraintHorizontal_bias="0.079"
+        app:layout_constraintVertical_bias="0.052" />
+
+</android.support.constraint.ConstraintLayout>
