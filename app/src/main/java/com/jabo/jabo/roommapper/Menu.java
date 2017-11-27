@@ -12,6 +12,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 
 import com.jabo.jabo.BT.BTConnectie;
@@ -44,7 +45,7 @@ public class Menu extends AppCompatActivity {
         // bt verbinding
         int REQUEST_ENABLE_BT = 1;
         String btdeviceName = "Swift 2 X";
-        String btdeviceHardwareAddress = "F6:D0:05:15:59:26";
+        //String btdeviceHardwareAddress = "F6:D0:05:15:59:26";
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         if (mBluetoothAdapter == null) {
             //
@@ -54,13 +55,15 @@ public class Menu extends AppCompatActivity {
             startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
         }
 
+        String devices[] = new String[] {};
         Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
         if (pairedDevices.size() > 0) {
             // There are paired devices. Get the name and address of each paired device.
+            int i =0;
             for (BluetoothDevice device : pairedDevices) {
                 String deviceName = device.getName();
                 String deviceHardwareAddress = device.getAddress(); // MAC address
-                if(deviceName.equalsIgnoreCase(btdeviceName) && deviceHardwareAddress.equalsIgnoreCase(btdeviceHardwareAddress)){
+                if(deviceName.equalsIgnoreCase(btdeviceName) /*&& deviceHardwareAddress.equalsIgnoreCase(btdeviceHardwareAddress)*/){
                     devicefound = true;
                     try {
                         BT = new BTConnectie(device);
@@ -76,8 +79,11 @@ public class Menu extends AppCompatActivity {
                     break;
                 }
                 else{
+                    i++;
+                    devicefound = false;
                     Log.d(deviceName,btdeviceName);
-                    Log.d(deviceHardwareAddress,btdeviceHardwareAddress);
+                    //devices[i] = deviceName;
+                    //Log.d(deviceHardwareAddress,btdeviceHardwareAddress);
                     Log.d("Device","not found");
                 }
             }
@@ -92,6 +98,8 @@ public class Menu extends AppCompatActivity {
             ImageView img = (ImageView) findViewById(R.id.imageView);
             img.setImageResource(button_onoff_indicator_on);
         }
+        Button settingspage = (Button) findViewById(R.id.SettingsButton);
+        settingspage.setEnabled(false); //TODO settingspage deactivated
     }
     public void SettingsPage(View view){
         Intent intent = new Intent(this,Settings.class);

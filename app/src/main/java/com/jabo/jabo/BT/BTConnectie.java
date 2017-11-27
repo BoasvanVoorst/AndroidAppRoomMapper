@@ -29,7 +29,6 @@ public class BTConnectie extends Thread {
         mmDevice = device;
         tmp = device.createRfcommSocketToServiceRecord(uuid);
         mmSocket = tmp;
-
     }
 
     public void run(){
