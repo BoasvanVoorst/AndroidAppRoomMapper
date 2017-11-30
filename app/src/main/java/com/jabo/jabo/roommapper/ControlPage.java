@@ -130,7 +130,7 @@ public class ControlPage extends AppCompatActivity {
 
         if (run == false && equals == false){
             run = true;
-            new ConnectTask().execute("");
+            //new ConnectTask().execute("");
             popup("started");
             samplesButtonadd.setEnabled(false);
             samplesButtonmin.setEnabled(false);
@@ -159,15 +159,15 @@ public class ControlPage extends AppCompatActivity {
             if (ConnectTask.mTcpClient != null) {
                 ConnectTask.mTcpClient.sendMessage("DISCONNECT<LOG>");
             }
-            if (ConnectTask.mTcpClient != null) {
+            /*if (ConnectTask.mTcpClient != null) {
                 ConnectTask.mTcpClient.sendMessage("<DISCONNECT>");
-            }
+            }*/
             run = false;
             if(BTConnectie.mConnectedThread != null) {
                 BTConnectie.mConnectedThread.write(message); // stop meting
             }
-            ConnectTask.mTcpClient.Cancel();
-            ConnectTask.mTcpClient.stopClient();
+            //ConnectTask.mTcpClient.Cancel();
+            //ConnectTask.mTcpClient.stopClient();
             samplesButtonadd.setEnabled(true);
             samplesButtonmin.setEnabled(true);
             RoomName.setEnabled(true);

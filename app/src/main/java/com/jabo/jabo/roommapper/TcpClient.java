@@ -127,10 +127,10 @@ public class TcpClient {
 
                 //in this while the client listens for the messages sent by the server
                 while (mRun) {
-                    Log.d("mRun","runs");
+                    //Log.d("mRun","runs");
                     try {
                         mServerMessage = mBufferIn.readLine();
-                        Log.d("received message", mServerMessage);
+                        //Log.d("received message", mServerMessage);
                     }
                     catch (IOException e){
                         //Log.e("TCP", "BufferIn: Error", e);
@@ -139,7 +139,7 @@ public class TcpClient {
                     }
                     if (mServerMessage != null && mMessageListener != null) {
                         //call the method messageReceived from MyActivity class
-                        Log.d("TCP Listner","message received");
+                        //Log.d("TCP Listner","message received");
                         mMessageListener.messageReceived(mServerMessage);
                         //mRun = false;
                     }

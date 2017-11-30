@@ -33,7 +33,7 @@ public class ConnectTask extends AsyncTask<String, String, TcpClient> {
             //here the messageReceived method is implemented
             public void messageReceived(String message) {
                 //this method calls the onProgressUpdate
-                Log.d("MessageReceived","1");
+                //Log.d("MessageReceived","1");
                 publishProgress(message);
             }
         });
@@ -46,7 +46,9 @@ public class ConnectTask extends AsyncTask<String, String, TcpClient> {
     @Override
     protected void onProgressUpdate(String... values) {
         super.onProgressUpdate(values);
-        Log.d("test", "response " + values[0]);
-        ControlPage.update(values[0]);
+        //Log.d("test", "response " + values[0]);
+        //for(int i = 0; i<1;i++);
+        //ControlPage.update(values[0]);
+        MappingPage.on_update_map(values[0]);
     }
 }
