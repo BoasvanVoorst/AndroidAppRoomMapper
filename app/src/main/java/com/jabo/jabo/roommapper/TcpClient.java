@@ -49,9 +49,14 @@ public class TcpClient {
      * @param message text entered by client
      */
     public void sendMessage(String message) {
-        if (mBufferOut != null && !mBufferOut.checkError()) {
-            mBufferOut.flush();
-            mBufferOut.println(message);
+        try {
+            if (mBufferOut != null && !mBufferOut.checkError()) {
+                mBufferOut.flush();
+                mBufferOut.println(message);
+            }
+        }
+        catch (Exception e){
+            Log.e("SendMessage","error",e);
         }
     }
 
@@ -74,7 +79,7 @@ public class TcpClient {
                 Log.e("TCP","Bufferin: "+ e);
             }
             finally {
-                return;
+                //return;
             }
         }
         mMessageListener = null;

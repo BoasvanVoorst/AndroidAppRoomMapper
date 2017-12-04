@@ -49,6 +49,7 @@ public class ConnectTask extends AsyncTask<String, String, TcpClient> {
         //Log.d("test", "response " + values[0]);
         //for(int i = 0; i<1;i++);
         //ControlPage.update(values[0]);
-        MappingPage.on_update_map(values[0]);
+        //MappingPage mappingpage = new MappingPage();
+        //mappingpage.on_update_map(values[0]);
     }
 }
