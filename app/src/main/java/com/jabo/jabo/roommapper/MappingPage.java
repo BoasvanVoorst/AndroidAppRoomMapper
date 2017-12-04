@@ -6,8 +6,9 @@ import android.os.Bundle;
 
 
 public class MappingPage extends Activity {
-    DrawView drawView;
-    private int[][] coords = new int[][]{{0,0},{10,0},{20,0},{30,0},{40,0},{50,0},{60,0},{70,0},{80,0},{80,10},{80,20},{80,30},{80,40},{80,50},{80,60},{80,70},{80,80}};
+    static DrawView drawView;
+    static int currentCoords = 0;
+    static int[][] coords = new int[1000][2];
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -15,7 +16,9 @@ public class MappingPage extends Activity {
         drawView = new DrawView(this);
         drawView.setBackgroundColor(Color.WHITE);
         setContentView(drawView);
-        drawView.update(coords);
+        if (ConnectTask.mTcpClient != null) {
+            ConnectTask.mTcpClient.sendMessage("<RMAP>");
+        }
     }
 
     @Override
@@ -24,7 +27,14 @@ public class MappingPage extends Activity {
         drawView.update(coords);
     }
 
-    public void update(String Message){
-
+    public static void update(String Message){
+        Message = Message.replace("message received","");
+        String[] xy = Message.split(",");
+        int x = Integer.parseInt(xy[0]);
+        int y = Integer.parseInt(xy[1]);
+        coords[currentCoords][0]=x;
+        coords[currentCoords][1]=y;
+        drawView.update(coords);
+        currentCoords++;
     }
 }

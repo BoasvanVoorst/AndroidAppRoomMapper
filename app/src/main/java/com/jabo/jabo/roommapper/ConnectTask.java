@@ -46,10 +46,7 @@ public class ConnectTask extends AsyncTask<String, String, TcpClient> {
     @Override
     protected void onProgressUpdate(String... values) {
         super.onProgressUpdate(values);
-        //Log.d("test", "response " + values[0]);
-        //for(int i = 0; i<1;i++);
-        //ControlPage.update(values[0]);
-        //MappingPage mappingpage = new MappingPage();
-        //mappingpage.on_update_map(values[0]);
+        MappingPage page = new MappingPage();
+        page.update(values[0]);
     }
 }
