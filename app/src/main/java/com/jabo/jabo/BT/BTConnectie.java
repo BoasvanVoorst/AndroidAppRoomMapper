@@ -56,10 +56,12 @@ public class BTConnectie extends Thread {
 
     public void cancel(){
         if(run) {
-            try {
-                mConnectedThread.cancel();
-                mmSocket.close();
-            } catch (IOException e) {
+            if(mConnectedThread != null) {
+                try {
+                    mConnectedThread.cancel();
+                    mmSocket.close();
+                } catch (IOException e) {
+                }
             }
         }
     }

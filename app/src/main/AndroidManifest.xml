@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.jabo.jabo.roommapper">
+    <uses-sdk android:minSdkVersion="8"/>
 
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
@@ -15,7 +16,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".Menu">
+        <activity android:name=".Menu" android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -24,13 +25,13 @@
         </activity>
         <activity
             android:name=".Settings"
-            android:parentActivityName=".Menu" />
+            android:parentActivityName=".Menu" android:screenOrientation="portrait"/>
         <activity
             android:name=".MappingPage"
-            android:parentActivityName=".Menu" />
+            android:parentActivityName=".Menu" android:screenOrientation="portrait"/>
         <activity
             android:name=".ControlPage"
-            android:parentActivityName=".Menu" />
+            android:parentActivityName=".Menu" android:screenOrientation="portrait"/>
     </application>
 
 </manifest>

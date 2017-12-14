@@ -85,9 +85,12 @@ public class BTConnected extends Thread{
     }
 
     public void cancel() {
-        try {
-            mmSocket.close();
-        } catch (IOException e) { }
+        if (mmSocket != null) {
+            try {
+                mmSocket.close();
+            } catch (IOException e) {
+            }
+        }
     }
 }
 

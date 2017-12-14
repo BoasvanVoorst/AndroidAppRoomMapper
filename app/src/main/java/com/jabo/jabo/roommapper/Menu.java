@@ -45,7 +45,7 @@ public class Menu extends AppCompatActivity {
         }
         // bt verbinding
         int REQUEST_ENABLE_BT = 1;
-        String btdeviceName = "Swift 2 X";
+        String btdeviceName = "LAPTOP-BOAS";
         //String btdeviceHardwareAddress = "F6:D0:05:15:59:26";
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         if (mBluetoothAdapter == null) {

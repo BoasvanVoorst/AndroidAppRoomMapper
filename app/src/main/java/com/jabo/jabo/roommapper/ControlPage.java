@@ -156,10 +156,10 @@ public class ControlPage extends AppCompatActivity {
         else if (equals == false)
         {
             popup("stopped");
-            if (ConnectTask.mTcpClient != null) {
+            /*if (ConnectTask.mTcpClient != null) {
                 ConnectTask.mTcpClient.sendMessage("DISCONNECT<LOG>");
             }
-            /*if (ConnectTask.mTcpClient != null) {
+            if (ConnectTask.mTcpClient != null) {
                 ConnectTask.mTcpClient.sendMessage("<DISCONNECT>");
             }*/
             run = false;

@@ -43,6 +43,12 @@ public class ConnectTask extends AsyncTask<String, String, TcpClient> {
         return null;
     }
 
+    public static void sendmessage(String Message){
+        if (mTcpClient != null) {
+            mTcpClient.sendMessage(Message);
+        }
+    }
+
     @Override
     protected void onProgressUpdate(String... values) {
         super.onProgressUpdate(values);
