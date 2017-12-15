@@ -4,18 +4,10 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.util.Log;
 
-import com.jabo.jabo.roommapper.ControlPage;
-
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.UUID;
 
 import static com.jabo.jabo.roommapper.Menu.mBluetoothAdapter;
-
-/**
- * Created by Server on 27-10-2017.
- */
 
 public class BTConnectie extends Thread {
     private BluetoothDevice mmDevice;
@@ -37,7 +29,6 @@ public class BTConnectie extends Thread {
         try {
             mmSocket.connect();
         } catch (IOException connectException) {
-            //ControlPage.popup("No device Connected");
             try {
                 mmSocket.close();
             } catch (IOException closeException) { }

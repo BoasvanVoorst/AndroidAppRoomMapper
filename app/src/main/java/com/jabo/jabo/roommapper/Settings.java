@@ -52,11 +52,6 @@ public class Settings extends AppCompatActivity {
         catch (NullPointerException e){
             Log.e("connect","get device name",e);
         }
-        /*for(int i = 0;i<devices.length;i++){
-            if(devices[i] == ""){
-                devices[i] = null;
-            }
-        }*/
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Select a device");
         builder.setItems(devices, new DialogInterface.OnClickListener() {

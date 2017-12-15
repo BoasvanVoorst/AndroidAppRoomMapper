@@ -1,6 +1,5 @@
 package com.jabo.jabo.roommapper;
 
-import android.app.Activity;
 import android.content.Context;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -13,12 +12,17 @@ import android.widget.JoystickView;
 import android.widget.JoystickView.OnJoystickMoveListener;
 import android.widget.Toast;
 import android.widget.ToggleButton;
+import android.os.PowerManager;
 
 import com.jabo.jabo.BT.BTConnectie;
 
 import static android.R.drawable.button_onoff_indicator_off;
 
 public class ControlPage extends AppCompatActivity {
+    protected PowerManager.WakeLock mWakeLock;
+
+    String TAG = "ControlPage";
+
     private int samples=1;
     private int power;
     private JoystickView joystick;
@@ -28,6 +32,12 @@ public class ControlPage extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_control_page);
+
+        Log.d(TAG, "onCreate: Powermanager");
+        final PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+        this.mWakeLock = pm.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK,"wakescreen");
+        this.mWakeLock.acquire();
+
         Context context = getApplicationContext();
         this.context =context;
 
@@ -156,18 +166,10 @@ public class ControlPage extends AppCompatActivity {
         else if (equals == false)
         {
             popup("stopped");
-            /*if (ConnectTask.mTcpClient != null) {
-                ConnectTask.mTcpClient.sendMessage("DISCONNECT<LOG>");
-            }
-            if (ConnectTask.mTcpClient != null) {
-                ConnectTask.mTcpClient.sendMessage("<DISCONNECT>");
-            }*/
             run = false;
             if(BTConnectie.mConnectedThread != null) {
                 BTConnectie.mConnectedThread.write(message); // stop meting
             }
-            //ConnectTask.mTcpClient.Cancel();
-            //ConnectTask.mTcpClient.stopClient();
             samplesButtonadd.setEnabled(true);
             samplesButtonmin.setEnabled(true);
             RoomName.setEnabled(true);
@@ -176,7 +178,6 @@ public class ControlPage extends AppCompatActivity {
             ToggleButton StartButton = (ToggleButton) findViewById(R.id.StartButton);
             StartButton.setChecked(false);
         }
-        //TODO continuously send direction, receive data points
     }
 
     public static void update(String Message) {
@@ -184,15 +185,12 @@ public class ControlPage extends AppCompatActivity {
             new ControlPage().start();
             popup("Server: No file name defined");
         }
-
     }
 
     @Override
     protected void onDestroy(){
         super.onDestroy();
-        /*if(ConnectTask.mTcpClient.mRun == false) {
-            ConnectTask.mTcpClient.stopClient();
-        }*/
+        this.mWakeLock.release();
     }
 
     public static void popup(String message){

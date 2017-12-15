@@ -1,8 +1,6 @@
 package com.jabo.jabo.roommapper;
 
-import android.app.Activity;
 import android.util.Log;
-import android.widget.ImageView;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -12,10 +10,6 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.Socket;
-import com.jabo.jabo.roommapper.*;
-
-import static android.R.drawable.button_onoff_indicator_off;
-import static android.R.drawable.button_onoff_indicator_on;
 
 /**
  * Created by Server on 9-10-2017.
@@ -49,15 +43,10 @@ public class TcpClient {
      * @param message text entered by client
      */
     public void sendMessage(String message) {
-        //try {
             if (mBufferOut != null && !mBufferOut.checkError()) {
                 mBufferOut.flush();
                 mBufferOut.println(message);
             }
-        //}
-        //catch (Exception e){
-        //    Log.e("SendMessage","error",e);
-        //}
     }
 
     /**
@@ -77,9 +66,6 @@ public class TcpClient {
             }
             catch (Exception e){
                 Log.e("TCP","Bufferin: "+ e);
-            }
-            finally {
-                //return;
             }
         }
         mMessageListener = null;
@@ -132,27 +118,20 @@ public class TcpClient {
 
                 //in this while the client listens for the messages sent by the server
                 while (mRun) {
-                    //Log.d("mRun","runs");
                     try {
                         mServerMessage = mBufferIn.readLine();
-                        //Log.d("received message", mServerMessage);
                     }
                     catch (IOException e){
-                        //Log.e("TCP", "BufferIn: Error", e);
                     }
                     finally {
                     }
                     if (mServerMessage != null && mMessageListener != null) {
                         //call the method messageReceived from MyActivity class
-                        //Log.d("TCP Listner","message received");
                         mMessageListener.messageReceived(mServerMessage);
-                        //mRun = false;
                     }
                 }
-                //Log.d("RESPONSE FROM SERVER", "S: Received Message: '" + mServerMessage + "'");
             }
             catch (Exception e) {
-                //Log.e("TCP", "S: Error", e);
             } finally {
                 //the socket must be closed. It is not possible to reconnect to this socket
                 // after it is closed, which means a new socket instance has to be created.
@@ -161,7 +140,6 @@ public class TcpClient {
             }
 
         } catch (Exception e) {
-            //Log.e("TCP", "C: Error", e);
             return;
         }
 

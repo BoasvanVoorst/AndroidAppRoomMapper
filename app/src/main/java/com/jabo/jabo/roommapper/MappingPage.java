@@ -1,12 +1,10 @@
 package com.jabo.jabo.roommapper;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.ViewTreeObserver;
 import android.widget.EditText;
@@ -31,18 +29,10 @@ public class MappingPage extends AppCompatActivity {
         drawView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
             public void onGlobalLayout() {
-                //Remove it here unless you want to get this callback for EVERY
-                //layout pass, which can get you into infinite loops if you ever
-                //modify the layout from within this method.
-                //drawView.getViewTreeObserver().removeGlobalOnLayoutListener(this);
-
-                //Now you can get the width and height from content
                 offsetx = drawView.getWidth()/2;
                 offsety = drawView.getHeight()/2;
             }
         });
-        //ConnectTask.sendmessage("<RMAP>");
-        //new ConnectTask().execute("");
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Choose room name");

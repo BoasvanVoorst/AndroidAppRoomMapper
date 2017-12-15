@@ -83,8 +83,6 @@ public class Menu extends AppCompatActivity {
                     i++;
                     devicefound = false;
                     Log.d(deviceName,btdeviceName);
-                    //devices[i] = deviceName;
-                    //Log.d(deviceHardwareAddress,btdeviceHardwareAddress);
                     Log.d("Device","not found");
                 }
             }
