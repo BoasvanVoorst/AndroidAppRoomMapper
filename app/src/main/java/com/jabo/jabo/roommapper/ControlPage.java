@@ -22,10 +22,6 @@ public class ControlPage extends AppCompatActivity {
     protected PowerManager.WakeLock mWakeLock;
 
     String TAG = "ControlPage";
-
-    private int samples=1;
-    private int power;
-    private JoystickView joystick;
     static Context context;
     static Toast toast;
     @Override
@@ -41,10 +37,11 @@ public class ControlPage extends AppCompatActivity {
         Context context = getApplicationContext();
         this.context =context;
 
-        TextView samplesnumber = (TextView) findViewById(R.id.samples);
+        /*TextView samplesnumber = (TextView) findViewById(R.id.samples);
         if(true){
             samplesnumber.setText(String.format("%s", samples));
-        }
+        }*/
+        /*
         joystick = (JoystickView) findViewById(R.id.joystick);
 
         joystick.setOnJoystickMoveListener(new OnJoystickMoveListener() {
@@ -97,9 +94,9 @@ public class ControlPage extends AppCompatActivity {
                     popup("cant send to device");
                 }
             }
-        }, JoystickView.DEFAULT_LOOP_INTERVAL);
+        }, JoystickView.DEFAULT_LOOP_INTERVAL);*/
     }
-
+    /*
     public void add_sample(View v){
         if (samples < 30) {
             samples++;
@@ -116,7 +113,7 @@ public class ControlPage extends AppCompatActivity {
             TextView samplesnumber = (TextView) findViewById(R.id.samples);
             samplesnumber.setText(String.format("%s", samples));
         }
-    }
+    }*/
     private boolean run = false;
     public void on_start(View v){
         start();
@@ -145,7 +142,7 @@ public class ControlPage extends AppCompatActivity {
             samplesButtonadd.setEnabled(false);
             samplesButtonmin.setEnabled(false);
             RoomName.setEnabled(false);
-            message[1] = (byte) samples;
+            //message[1] = (byte) samples; //TODO
             message[2]= (byte)'\n';
             message[0] = (byte)(message.length+32);
             try {
@@ -177,13 +174,6 @@ public class ControlPage extends AppCompatActivity {
         else{
             ToggleButton StartButton = (ToggleButton) findViewById(R.id.StartButton);
             StartButton.setChecked(false);
-        }
-    }
-
-    public static void update(String Message) {
-        if (Message == "No filename defined") {
-            new ControlPage().start();
-            popup("Server: No file name defined");
         }
     }
 
