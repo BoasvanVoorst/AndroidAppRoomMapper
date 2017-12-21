@@ -4,8 +4,10 @@ import android.content.Context;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.JoystickView;
@@ -24,6 +26,12 @@ public class ControlPage extends AppCompatActivity {
     String TAG = "ControlPage";
     static Context context;
     static Toast toast;
+    static byte[] direction = new byte[1];
+
+    ImageButton ForwardButton;
+    ImageButton BackwardButton;
+    ImageButton LeftButton;
+    ImageButton RightButton;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -37,90 +45,225 @@ public class ControlPage extends AppCompatActivity {
         Context context = getApplicationContext();
         this.context =context;
 
-        /*TextView samplesnumber = (TextView) findViewById(R.id.samples);
-        if(true){
-            samplesnumber.setText(String.format("%s", samples));
-        }*/
-        /*
-        joystick = (JoystickView) findViewById(R.id.joystick);
+        ForwardButton = (ImageButton) findViewById(R.id.ForwardButton);
+        BackwardButton = (ImageButton) findViewById(R.id.BackwardButton);
+        LeftButton = (ImageButton) findViewById(R.id.LeftButton);
+        RightButton = (ImageButton) findViewById(R.id.RightButton);
 
-        joystick.setOnJoystickMoveListener(new OnJoystickMoveListener() {
-
+        findViewById(R.id.ForwardButton).setOnTouchListener(new View.OnTouchListener(){
             @Override
-            public void onValueChanged(int angle, int input_power, int direction) {
-                power= input_power;
-                byte[] message = new byte[4];
-                message[2] = (byte)power;
-                message[3]= (byte)'\n';
-                switch (direction) {
-                    case JoystickView.FRONT:
-                        message[1] = 1;
-                        break;
-                    case JoystickView.FRONT_RIGHT:
-                        message[1] = 2;
-                        break;
-                    case JoystickView.RIGHT:
-                        message[1] = 3;
-                        break;
-                    case JoystickView.RIGHT_BOTTOM:
-                        message[1] = 4;
-                        break;
-                    case JoystickView.BOTTOM:
-                        message[1] = 5;
-                        break;
-                    case JoystickView.BOTTOM_LEFT:
-                        message[1] = 6;
-                        break;
-                    case JoystickView.LEFT:
-                        message[1] = 7;
-                        break;
-                    case JoystickView.LEFT_FRONT:
-                        message[1] = 8;
-                        break;
-                    default:
-                        message[1] = 0;//halt
-                }
-                message[0] = (byte)(message.length+16);
-                try {
-                    if (BTConnectie.mConnectedThread.isAlive()) {
-                        BTConnectie.mConnectedThread.write(message);
-                    } else {
-                        popup("cant send to device");
-                        ImageView img = (ImageView) findViewById(R.id.Bluetooth);
-                        img.setImageResource(button_onoff_indicator_off);
+            public boolean onTouch(View v, MotionEvent event){
+                if(event.getAction() == MotionEvent.ACTION_DOWN){
+                    BackwardButton.setEnabled(false);
+                    if(RightButton.isPressed()) {
+                        Log.d(TAG, "onTouch: Right_front");
+                        direction[0] = 4;
+                    }
+                    else if (LeftButton.isPressed()){
+                        Log.d(TAG, "onTouch: Left Front");
+                        direction[0] = 2;
+                    }
+                    else{
+                        Log.d(TAG, "onTouch: forward");
+                        direction[0] = 3;
+                    }
+                    if(BTConnectie.mConnectedThread != null) {
+                        BTConnectie.mConnectedThread.write(direction);
+                    }
+                    else{
+                        popup("cant send to bt device");
+                        Log.d(TAG, "onTouch: error");
                     }
                 }
-                catch (Exception e){
-                    popup("cant send to device");
+                else if(event.getAction() == MotionEvent.ACTION_UP){
+                    BackwardButton.setEnabled(true);
+                    if(RightButton.isPressed()) {
+                        Log.d(TAG, "onTouch: Right");
+                        direction[0] = 5;
+                    }
+                    else if (LeftButton.isPressed()){
+                        Log.d(TAG, "onTouch: Left");
+                        direction[0] = 1;
+                    }
+                    else{
+                        Log.d(TAG, "onTouch: halt");
+                        direction[0] = 0;
+                    }
+                    if(BTConnectie.mConnectedThread != null) {
+                        BTConnectie.mConnectedThread.write(direction);
+                    }
+                    else{
+                        popup("cant send to bt device");
+                        Log.d(TAG, "onTouch: error");
+                    }
                 }
+                return false;
             }
-        }, JoystickView.DEFAULT_LOOP_INTERVAL);*/
-    }
-    /*
-    public void add_sample(View v){
-        if (samples < 30) {
-            samples++;
-            popup("sample added");
-            TextView samplesnumber = (TextView) findViewById(R.id.samples);
-            samplesnumber.setText(String.format("%s", samples));
-        }
+        });
+        
+        findViewById(R.id.BackwardButton).setOnTouchListener(new View.OnTouchListener(){
+            @Override
+            public boolean onTouch(View v, MotionEvent event){
+                if(event.getAction() == MotionEvent.ACTION_DOWN){
+                    ForwardButton.setEnabled(false);
+                    if(RightButton.isPressed()) {
+                        Log.d(TAG, "onTouch: Right_Back");
+                        direction[0] = 6;
+                    }
+                    else if (LeftButton.isPressed()){
+                        Log.d(TAG, "onTouch: Left Back");
+                        direction[0] = 8;
+                    }
+                    else{
+                        Log.d(TAG, "onTouch: backward");
+                        direction[0] = 7;
+                    }
+                    if(BTConnectie.mConnectedThread != null) {
+                        BTConnectie.mConnectedThread.write(direction);
+                    }
+                    else{
+                        popup("cant send to bt device");
+                        Log.d(TAG, "onTouch: error");
+                    }
+                }
+                else if(event.getAction() == MotionEvent.ACTION_UP){
+                    ForwardButton.setEnabled(true);
+                    if(RightButton.isPressed()) {
+                        Log.d(TAG, "onTouch: right");
+                        direction[0] = 5;
+                    }
+                    else if (LeftButton.isPressed()){
+                        Log.d(TAG, "onTouch: left");
+                        direction[0] = 1;
+                    }
+                    else{
+                        Log.d(TAG, "onTouch: halt");
+                        direction[0] = 0;
+                    }
+                    if(BTConnectie.mConnectedThread != null) {
+                        BTConnectie.mConnectedThread.write(direction);
+                    }
+                    else{
+                        popup("cant send to bt device");
+                        Log.d(TAG, "onTouch: error");
+                    }
+                }
+                return false;
+            }
+        });
+        
+        findViewById(R.id.RightButton).setOnTouchListener(new View.OnTouchListener(){
+            @Override
+            public boolean onTouch(View v, MotionEvent event){
+                if(event.getAction() == MotionEvent.ACTION_DOWN){
+                    LeftButton.setEnabled(false);
+                    if(ForwardButton.isPressed()){
+                        direction[0] = 4;
+                        Log.d(TAG, "onTouch: Front_right");
+                    }
+                    else if(BackwardButton.isPressed()){
+                        direction[0] = 6;
+                        Log.d(TAG, "onTouch: Backwards_right");
+                    }
+                    else{
+                        Log.d(TAG, "onTouch: right");
+                        direction[0] = 5;
+                    }
+                    if(BTConnectie.mConnectedThread != null) {
+                        BTConnectie.mConnectedThread.write(direction);
+                    }
+                    else{
+                        popup("cant send to bt device");
+                        Log.d(TAG, "onTouch: error");
+                    }
+                }
+                else if(event.getAction() == MotionEvent.ACTION_UP){
+                    LeftButton.setEnabled(true);
+                    if(ForwardButton.isPressed()){
+                        direction[0] = 3;
+                        Log.d(TAG, "onTouch: forward");
+                    }
+                    else if(BackwardButton.isPressed()){
+                        direction[0] = 7;
+                        Log.d(TAG, "onTouch: Backwards");
+                    }
+                    else{
+                        Log.d(TAG, "onTouch: halt");
+                        direction[0] = 0;
+                    }
+                    if(BTConnectie.mConnectedThread != null) {
+                        BTConnectie.mConnectedThread.write(direction);
+                    }
+                    else{
+                        popup("cant send to bt device");
+                        Log.d(TAG, "onTouch: error");
+                    }
+                }
+                return false;
+            }
+        });
+        
+        findViewById(R.id.LeftButton).setOnTouchListener(new View.OnTouchListener(){
+            @Override
+            public boolean onTouch(View v, MotionEvent event){
+                if(event.getAction() == MotionEvent.ACTION_DOWN){
+                    RightButton.setEnabled(false);
+                    if(ForwardButton.isPressed()){
+                        direction[0] = 2;
+                        Log.d(TAG, "onTouch: Left_forward");
+                    }
+                    else if(BackwardButton.isPressed()){
+                        direction[0] = 8;
+                        Log.d(TAG, "onTouch: left_backwards");
+                    }
+                    else{
+                        Log.d(TAG, "onTouch: left");
+                        direction[0] = 1;
+                    }
+                    if(BTConnectie.mConnectedThread != null) {
+                        BTConnectie.mConnectedThread.write(direction);
+                    }
+                    else{
+                        popup("cant send to bt device");
+                        Log.d(TAG, "onTouch: error");
+                    }
+                }
+                else if(event.getAction() == MotionEvent.ACTION_UP){
+                    RightButton.setEnabled(true);
+                    if(ForwardButton.isPressed()){
+                        direction[0] = 3;
+                        Log.d(TAG, "onTouch: forward");
+                    }
+                    else if(BackwardButton.isPressed()){
+                        direction[0] = 7;
+                        Log.d(TAG, "onTouch: Backwards");
+                    }
+                    else{
+                        Log.d(TAG, "onTouch: halt");
+                        direction[0] = 0;
+                    }
+                    if(BTConnectie.mConnectedThread != null) {
+                        BTConnectie.mConnectedThread.write(direction);
+                    }
+                    else{
+                        popup("cant send to bt device");
+                        Log.d(TAG, "onTouch: error");
+                    }
+                }
+                return false;
+            }
+        });
+
     }
 
-    public void min_sample(View v){
-        if(samples> 1) {
-            popup("sample subtracted");
-            samples--;
-            TextView samplesnumber = (TextView) findViewById(R.id.samples);
-            samplesnumber.setText(String.format("%s", samples));
-        }
-    }*/
     private boolean run = false;
     public void on_start(View v){
         start();
     }
 
     private void start(){
-        byte[] message = new byte[3];
+        byte[] message = new byte[1];
+        message[0]=(byte)0xAA;
         Button samplesButtonadd = (Button) findViewById(R.id.addSample);
         Button samplesButtonmin = (Button) findViewById(R.id.minsample);
         TextView RoomName = (TextView) findViewById(R.id.RoomName);
@@ -135,16 +278,13 @@ public class ControlPage extends AppCompatActivity {
             popup("please enter a room name");
         }
 
-        if (run == false && equals == false){
+        if (run == false && equals == false &&BTConnectie.mConnectedThread != null){
             run = true;
             //new ConnectTask().execute("");
             popup("started");
             samplesButtonadd.setEnabled(false);
             samplesButtonmin.setEnabled(false);
             RoomName.setEnabled(false);
-            //message[1] = (byte) samples; //TODO
-            message[2]= (byte)'\n';
-            message[0] = (byte)(message.length+32);
             try {
                 if(BTConnectie.mConnectedThread != null) {
                     BTConnectie.mConnectedThread.write(message); //start meting
@@ -160,7 +300,7 @@ public class ControlPage extends AppCompatActivity {
                 ConnectTask.mTcpClient.sendMessage(input+"<NAME>");
             }
         }
-        else if (equals == false)
+        else if (equals == false&&BTConnectie.mConnectedThread != null)
         {
             popup("stopped");
             run = false;
@@ -174,6 +314,7 @@ public class ControlPage extends AppCompatActivity {
         else{
             ToggleButton StartButton = (ToggleButton) findViewById(R.id.StartButton);
             StartButton.setChecked(false);
+            popup("cant send message to device");
         }
     }
 

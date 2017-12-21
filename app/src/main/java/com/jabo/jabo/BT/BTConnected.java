@@ -39,7 +39,7 @@ public class BTConnected extends Thread{
         int bytes = 0;
         while (true) {
             try {
-                bytes += mmInStream.read(buffer, bytes, buffer.length - bytes);
+                bytes += mmInStream.read(buffer, bytes, buffer.length - bytes);//TODO
                 if(buffer[0] == 0x33) {
                     int X = buffer[2]|(buffer[1]<<8);
                     int Y = buffer[4]|(buffer[3]<<8);//3300010001 =x,1 en y,1
