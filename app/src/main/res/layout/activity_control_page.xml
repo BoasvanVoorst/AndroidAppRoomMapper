@@ -108,8 +108,8 @@
         android:id="@+id/LeftButton"
         android:layout_width="70dp"
         android:layout_height="70dp"
-        android:layout_marginBottom="184dp"
-        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="156dp"
+        android:layout_marginEnd="4dp"
         android:rotation="90"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/RightButton"
@@ -119,7 +119,7 @@
         android:id="@+id/RightButton"
         android:layout_width="70dp"
         android:layout_height="70dp"
-        android:layout_marginBottom="184dp"
+        android:layout_marginBottom="156dp"
         android:layout_marginEnd="16dp"
         android:layout_marginRight="16dp"
         android:rotation="-90"
@@ -127,5 +127,66 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:srcCompat="@android:drawable/arrow_down_float" />
+
+    <ImageView
+        android:id="@+id/sensor5"
+        android:layout_width="43dp"
+        android:layout_height="52dp"
+        android:layout_marginStart="12dp"
+        android:layout_marginTop="4dp"
+        app:layout_constraintStart_toStartOf="@+id/voertuigIMG"
+        app:layout_constraintTop_toTopOf="@+id/voertuigIMG"
+        app:srcCompat="@android:color/holo_green_dark" />
+
+    <ImageView
+        android:id="@+id/sensor3"
+        android:layout_width="44dp"
+        android:layout_height="52dp"
+        android:layout_marginEnd="14dp"
+        android:layout_marginTop="4dp"
+        app:layout_constraintEnd_toEndOf="@+id/voertuigIMG"
+        app:layout_constraintTop_toTopOf="@+id/voertuigIMG"
+        app:srcCompat="@android:color/holo_green_dark" />
+
+    <ImageView
+        android:id="@+id/sensor4"
+        android:layout_width="42dp"
+        android:layout_height="21dp"
+        android:layout_marginTop="4dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/sensor5"
+        app:layout_constraintTop_toTopOf="@+id/voertuigIMG"
+        app:srcCompat="@android:color/holo_red_dark" />
+
+    <ImageView
+        android:id="@+id/sensor1"
+        android:layout_width="44dp"
+        android:layout_height="22dp"
+        android:layout_marginBottom="4dp"
+        android:layout_marginStart="24dp"
+        app:layout_constraintBottom_toBottomOf="@+id/voertuigIMG"
+        app:layout_constraintStart_toStartOf="@+id/voertuigIMG"
+        app:srcCompat="@android:color/holo_green_dark" />
+
+    <ImageView
+        android:id="@+id/sensor2"
+        android:layout_width="44dp"
+        android:layout_height="22dp"
+        android:layout_marginBottom="4dp"
+        android:layout_marginEnd="32dp"
+        app:layout_constraintBottom_toBottomOf="@+id/voertuigIMG"
+        app:layout_constraintEnd_toEndOf="@+id/voertuigIMG"
+        app:srcCompat="@android:color/holo_green_dark" />
+
+    <ImageView
+        android:id="@+id/voertuigIMG"
+        android:layout_width="155dp"
+        android:layout_height="179dp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintHorizontal_bias="0.502"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/RoomName"
+        app:srcCompat="@drawable/voertuig" />
 
 </android.support.constraint.ConstraintLayout>
