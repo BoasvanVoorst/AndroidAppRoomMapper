@@ -74,16 +74,6 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.079" />
 
-    <ImageView
-        android:id="@+id/StopImage"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:layout_marginEnd="25dp"
-        android:layout_marginTop="8dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@android:drawable/presence_busy" />
-
     <ImageButton
         android:id="@+id/ForwardButton"
         android:layout_width="70dp"
@@ -188,5 +178,16 @@
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/RoomName"
         app:srcCompat="@drawable/voertuig" />
+
+    <ImageView
+        android:id="@+id/engineImage"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginBottom="56dp"
+        android:layout_marginStart="56dp"
+        app:layout_constraintBottom_toBottomOf="@+id/voertuigIMG"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/voertuigIMG"
+        app:srcCompat="@android:drawable/presence_busy" />
 
 </android.support.constraint.ConstraintLayout>

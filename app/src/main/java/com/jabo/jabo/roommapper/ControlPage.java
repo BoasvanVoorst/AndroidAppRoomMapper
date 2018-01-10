@@ -1,6 +1,11 @@
 package com.jabo.jabo.roommapper;
 
+import android.app.Activity;
 import android.content.Context;
+import android.graphics.Color;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -16,6 +21,7 @@ import android.widget.Toast;
 import android.widget.ToggleButton;
 import android.os.PowerManager;
 
+import com.jabo.jabo.BT.BTConnected;
 import com.jabo.jabo.BT.BTConnectie;
 
 import static android.R.drawable.button_onoff_indicator_off;
@@ -36,6 +42,29 @@ public class ControlPage extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_control_page);
+        final Activity var = this;
+        Menu.mmHandler=null;
+        Menu.mmHandler = new Handler(Looper.getMainLooper()){
+            @Override
+            public void handleMessage(Message inputmessage){
+                switch (inputmessage.what){
+                    case BTConnected.ENGINE_ON:
+                        Log.d(TAG, "handleMessage: Engine on");
+                        break;
+                    case BTConnected.ENGINE_OFF:
+                        Log.d(TAG, "handleMessage: Engine off");
+                        break;
+                    case BTConnected.UPDATE_SENSOR:
+                        Log.d(TAG, "handleMessage: Update sensor"+inputmessage.arg1);
+                        int color = inputmessage.arg1;
+                        int sensor = inputmessage.arg2;
+                        break;
+                    case BTConnected.CONNECTION_FAILED:
+                        Toast.makeText(var, "BT connection failed",Toast.LENGTH_SHORT).show();
+                        break;
+                }
+            }
+        };
 
         Log.d(TAG, "onCreate: Powermanager");
         final PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
@@ -335,5 +364,25 @@ public class ControlPage extends AppCompatActivity {
             toast = Toast.makeText(context,message,duration);
             toast.show();
         }
+    }
+
+    public void EngineOn(boolean state){
+        ImageView engine = (ImageView) findViewById(R.id.engineImage);
+        if(state){
+            engine.setImageResource(android.R.drawable.presence_online);
+        }
+        else{
+            engine.setImageResource(android.R.drawable.presence_busy);
+        }
+    }
+
+    public void updateSensor(int color, int wich_sensor){
+        ImageView sensor1 = (ImageView)findViewById(R.id.sensor1);
+        ImageView sensor2 = (ImageView)findViewById(R.id.sensor2);
+        ImageView sensor3 = (ImageView)findViewById(R.id.sensor3);
+        ImageView sensor4 = (ImageView)findViewById(R.id.sensor4);
+        ImageView sensor5 = (ImageView)findViewById(R.id.sensor5);
+        ImageView Sensors[] = {sensor1,sensor2,sensor3,sensor4,sensor5};
+        Sensors[wich_sensor-1].setBackgroundColor(color);
     }
 }
