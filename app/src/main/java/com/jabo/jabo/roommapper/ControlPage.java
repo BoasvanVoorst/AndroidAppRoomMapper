@@ -304,6 +304,10 @@ public class ControlPage extends AppCompatActivity implements AdapterView.OnItem
 
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
+        enableDisableBT();
+
+
+
     }
 
     public void on_start(View v){
@@ -433,6 +437,7 @@ public class ControlPage extends AppCompatActivity implements AdapterView.OnItem
                         break;
                     case BluetoothAdapter.STATE_ON:
                         Log.d(TAG, "mBroadcastReceiver1: STATE ON");
+                        btnDiscover();
                         break;
                     case BluetoothAdapter.STATE_TURNING_ON:
                         Log.d(TAG, "mBroadcastReceiver1: STATE TURNING ON");
@@ -582,7 +587,7 @@ public class ControlPage extends AppCompatActivity implements AdapterView.OnItem
     //endregion
 
 
-    public void btnDiscover(View view) {
+    public void btnDiscover(/*View view*/) {
         Log.d(TAG, "btnDiscover: Looking for unpaired devices.");
 
         if(mBluetoothAdapter.isDiscovering()){
