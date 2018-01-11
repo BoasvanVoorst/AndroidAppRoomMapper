@@ -565,13 +565,6 @@ public class ControlPage extends AppCompatActivity implements AdapterView.OnItem
             IntentFilter BTIntent = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
             registerReceiver(mBroadcastReceiver1, BTIntent);
         }
-        /*if(mBluetoothAdapter.isEnabled()){
-            Log.d(TAG, "enableDisableBT: disabling BT.");
-            mBluetoothAdapter.disable();
-
-            IntentFilter BTIntent = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
-            registerReceiver(mBroadcastReceiver1, BTIntent);
-        }*/
     }
 
     //region make discoverable (niet nodig)
