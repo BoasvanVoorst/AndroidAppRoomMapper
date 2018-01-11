@@ -30,7 +30,11 @@ import android.os.PowerManager;
 import com.jabo.jabo.BT.BluetoothConnectionService;
 
 import java.util.ArrayList;
+import java.util.Set;
 import java.util.UUID;
+
+import static android.R.drawable.button_onoff_indicator_off;
+import static android.R.drawable.button_onoff_indicator_on;
 
 public class ControlPage extends AppCompatActivity implements AdapterView.OnItemClickListener{
     private final String TAG = "ControlPage";
@@ -101,13 +105,7 @@ public class ControlPage extends AppCompatActivity implements AdapterView.OnItem
                         Log.d(TAG, "onTouch: forward");
                         direction[0] = 3;
                     }
-                    if(BTConnectie.mConnectedThread != null) {
-                        BTConnectie.mConnectedThread.write(direction);
-                    }
-                    else{
-                        popup("cant send to bt device");
-                        Log.d(TAG, "onTouch: error");
-                    }
+                    mBluetoothConnection.write(direction);
                 }
                 else if(event.getAction() == MotionEvent.ACTION_UP){
                     BackwardButton.setEnabled(true);
@@ -123,13 +121,7 @@ public class ControlPage extends AppCompatActivity implements AdapterView.OnItem
                         Log.d(TAG, "onTouch: halt");
                         direction[0] = 0;
                     }
-                    if(BTConnectie.mConnectedThread != null) {
-                        BTConnectie.mConnectedThread.write(direction);
-                    }
-                    else{
-                        popup("cant send to bt device");
-                        Log.d(TAG, "onTouch: error");
-                    }
+                    mBluetoothConnection.write(direction);
                 }
                 return false;
             }
@@ -155,13 +147,7 @@ public class ControlPage extends AppCompatActivity implements AdapterView.OnItem
                         Log.d(TAG, "onTouch: backward");
                         direction[0] = 7;
                     }
-                    if(BTConnectie.mConnectedThread != null) {
-                        BTConnectie.mConnectedThread.write(direction);
-                    }
-                    else{
-                        popup("cant send to bt device");
-                        Log.d(TAG, "onTouch: error");
-                    }
+                    mBluetoothConnection.write(direction);
                 }
                 else if(event.getAction() == MotionEvent.ACTION_UP){
                     ForwardButton.setEnabled(true);
@@ -177,13 +163,7 @@ public class ControlPage extends AppCompatActivity implements AdapterView.OnItem
                         Log.d(TAG, "onTouch: halt");
                         direction[0] = 0;
                     }
-                    if(BTConnectie.mConnectedThread != null) {
-                        BTConnectie.mConnectedThread.write(direction);
-                    }
-                    else{
-                        popup("cant send to bt device");
-                        Log.d(TAG, "onTouch: error");
-                    }
+                    mBluetoothConnection.write(direction);
                 }
                 return false;
             }
@@ -208,13 +188,7 @@ public class ControlPage extends AppCompatActivity implements AdapterView.OnItem
                         Log.d(TAG, "onTouch: right");
                         direction[0] = 5;
                     }
-                    if(BTConnectie.mConnectedThread != null) {
-                        BTConnectie.mConnectedThread.write(direction);
-                    }
-                    else{
-                        popup("cant send to bt device");
-                        Log.d(TAG, "onTouch: error");
-                    }
+                    mBluetoothConnection.write(direction);
                 }
                 else if(event.getAction() == MotionEvent.ACTION_UP){
                     LeftButton.setEnabled(true);
@@ -230,13 +204,7 @@ public class ControlPage extends AppCompatActivity implements AdapterView.OnItem
                         Log.d(TAG, "onTouch: halt");
                         direction[0] = 0;
                     }
-                    if(BTConnectie.mConnectedThread != null) {
-                        BTConnectie.mConnectedThread.write(direction);
-                    }
-                    else{
-                        popup("cant send to bt device");
-                        Log.d(TAG, "onTouch: error");
-                    }
+                    mBluetoothConnection.write(direction);
                 }
                 return false;
             }
@@ -261,13 +229,7 @@ public class ControlPage extends AppCompatActivity implements AdapterView.OnItem
                         Log.d(TAG, "onTouch: left");
                         direction[0] = 1;
                     }
-                    if(BTConnectie.mConnectedThread != null) {
-                        BTConnectie.mConnectedThread.write(direction);
-                    }
-                    else{
-                        popup("cant send to bt device");
-                        Log.d(TAG, "onTouch: error");
-                    }
+                    mBluetoothConnection.write(direction);
                 }
                 else if(event.getAction() == MotionEvent.ACTION_UP){
                     RightButton.setEnabled(true);
@@ -283,13 +245,7 @@ public class ControlPage extends AppCompatActivity implements AdapterView.OnItem
                         Log.d(TAG, "onTouch: halt");
                         direction[0] = 0;
                     }
-                    if(BTConnectie.mConnectedThread != null) {
-                        BTConnectie.mConnectedThread.write(direction);
-                    }
-                    else{
-                        popup("cant send to bt device");
-                        Log.d(TAG, "onTouch: error");
-                    }
+                    mBluetoothConnection.write(direction);
                 }
                 return false;
             }
@@ -306,8 +262,31 @@ public class ControlPage extends AppCompatActivity implements AdapterView.OnItem
 
         enableDisableBT();
 
+        String btdeviceName = "JaBo";
+        Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
+        if (pairedDevices.size() > 0) {
+            // There are paired devices. Get the name and address of each paired device.
+            int i =0;
+            for (BluetoothDevice device : pairedDevices) {
+                String deviceName = device.getName();
+                if(deviceName.equalsIgnoreCase(btdeviceName)){
+                    try {
+                        Log.d("Device","Connected");
+                        mBTDevice = device;
+                        startConnection();
+                    }
+                    catch (Exception e){
 
-
+                    }
+                    break;
+                }
+                else{
+                    i++;
+                    Log.d(deviceName,btdeviceName);
+                    Log.d("Device","not found");
+                }
+            }
+        }
     }
 
     public void on_start(View v){
@@ -331,7 +310,7 @@ public class ControlPage extends AppCompatActivity implements AdapterView.OnItem
             popup("please enter a room name");
         }
 
-        if (run == false && equals == false &&BTConnectie.mConnectedThread != null){
+        if (run == false && equals == false){
             run = true;
             //new ConnectTask().execute("");
             popup("started");
@@ -339,9 +318,7 @@ public class ControlPage extends AppCompatActivity implements AdapterView.OnItem
             samplesButtonmin.setEnabled(false);
             RoomName.setEnabled(false);
             try {
-                if(BTConnectie.mConnectedThread != null) {
-                    BTConnectie.mConnectedThread.write(message); //start meting
-                }
+                mBluetoothConnection.write(message);
             }
             catch (Exception e){
                 Log.e("ControlPage","Write",e);
@@ -353,13 +330,11 @@ public class ControlPage extends AppCompatActivity implements AdapterView.OnItem
                 ConnectTask.mTcpClient.sendMessage(input+"<NAME>");
             }
         }
-        else if (equals == false&&BTConnectie.mConnectedThread != null)
+        else if (equals == false)
         {
             popup("stopped");
             run = false;
-            if(BTConnectie.mConnectedThread != null) {
-                BTConnectie.mConnectedThread.write(message); // stop meting
-            }
+            mBluetoothConnection.write(message);
             samplesButtonadd.setEnabled(true);
             samplesButtonmin.setEnabled(true);
             RoomName.setEnabled(true);

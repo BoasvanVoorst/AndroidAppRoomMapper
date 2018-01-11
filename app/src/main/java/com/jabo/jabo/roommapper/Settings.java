@@ -15,9 +15,6 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Set;
 
-import static com.jabo.jabo.roommapper.Menu.mBluetoothAdapter;
-
-
 public class Settings extends AppCompatActivity {
 
     @Override
@@ -29,7 +26,7 @@ public class Settings extends AppCompatActivity {
     public void save (View v){
 
     }
-    private ArrayList<BluetoothDevice> mDeviceList;
+    /*private ArrayList<BluetoothDevice> mDeviceList;
     private String devices[] = {"","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""};
     public void connect_device(View v){
         Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
@@ -69,7 +66,7 @@ public class Settings extends AppCompatActivity {
             }
         });
         builder.show();
-    }
+    }*/
 
     public void wake_screen(View v){
 
