@@ -126,8 +126,18 @@ public class Menu extends AppCompatActivity {
             ImageView img = (ImageView) findViewById(R.id.imageView);
             img.setImageResource(button_onoff_indicator_on);
         }
+
+        findViewById(R.id.SettingsButton).setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                Intent intent = new Intent(var,testActivity.class);
+                startActivity(intent);
+                return true;
+            }
+        });
+
         Button settingspage = (Button) findViewById(R.id.SettingsButton);
-        settingspage.setEnabled(false); //TODO settingspage deactivated
+        //settingspage.setEnabled(false); //TODO settingspage deactivated
     }
 
     @Override
