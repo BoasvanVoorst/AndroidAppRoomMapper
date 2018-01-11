@@ -37,8 +37,7 @@ public class testActivity extends AppCompatActivity implements AdapterView.OnIte
 
     EditText etSend;
 
-    private static final UUID MY_UUID_INSECURE =
-            UUID.fromString("8ce255c0-200a-11e0-ac64-0800200c9a66");
+    private static final UUID MY_UUID_INSECURE = UUID.fromString("8ce255c0-200a-11e0-ac64-0800200c9a66");
 
     BluetoothDevice mBTDevice;
 
@@ -231,7 +230,7 @@ public class testActivity extends AppCompatActivity implements AdapterView.OnIte
     }
 
     //create method for starting connection
-//***remember the conncction will fail and app will crash if you haven't paired first
+    //***remember the conncction will fail and app will crash if you haven't paired first
     public void startConnection(){
         startBTConnection(mBTDevice,MY_UUID_INSECURE);
     }
