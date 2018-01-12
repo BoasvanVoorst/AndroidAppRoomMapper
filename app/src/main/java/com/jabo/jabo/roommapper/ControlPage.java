@@ -56,7 +56,7 @@ public class ControlPage extends AppCompatActivity implements AdapterView.OnItem
 
     BluetoothAdapter mBluetoothAdapter;
 
-    private static final UUID MY_UUID_INSECURE = UUID.fromString("8ce255c0-200a-11e0-ac64-0800200c9a66");
+    private static final UUID MY_UUID_INSECURE = UUID.fromString("00001101-0000-1000-8000-00805f9b34fb");
 
     BluetoothDevice mBTDevice;
 
@@ -397,7 +397,6 @@ public class ControlPage extends AppCompatActivity implements AdapterView.OnItem
                         break;
                     case BluetoothAdapter.STATE_ON:
                         Log.d(TAG, "mBroadcastReceiver1: STATE ON");
-                        btnDiscover();
                         break;
                     case BluetoothAdapter.STATE_TURNING_ON:
                         Log.d(TAG, "mBroadcastReceiver1: STATE TURNING ON");
@@ -408,12 +407,12 @@ public class ControlPage extends AppCompatActivity implements AdapterView.OnItem
     };
     //endregion
 
-    //region broadcastreceiver2
+    //region broadcastreceiver2 (niet nodig)
     /**
      * Broadcast Receiver for changes made to bluetooth states such as:
      * 1) Discoverability mode on/off or expire.
      */
-    private final BroadcastReceiver mBroadcastReceiver2 = new BroadcastReceiver() {
+    /*private final BroadcastReceiver mBroadcastReceiver2 = new BroadcastReceiver() {
 
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -445,15 +444,15 @@ public class ControlPage extends AppCompatActivity implements AdapterView.OnItem
 
             }
         }
-    };
+    };*/
     //endregion
 
-    //region Broadcastreceiver3
+    //region Broadcastreceiver3 (niet nodig)
     /**
      * Broadcast Receiver for listing devices that are not yet paired
      * -Executed by btnDiscover() method.
      */
-    private BroadcastReceiver mBroadcastReceiver3 = new BroadcastReceiver() {
+    /*private BroadcastReceiver mBroadcastReceiver3 = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             final String action = intent.getAction();
@@ -466,8 +465,8 @@ public class ControlPage extends AppCompatActivity implements AdapterView.OnItem
                 mDeviceListAdapter = new DeviceListAdapter(context, R.layout.device_adapter_view, mBTDevices);
             }
         }
-    };
-    //endregion
+    };*/
+    //endregionf
 
     //region Broadcastreceiver4
     /**
@@ -502,7 +501,7 @@ public class ControlPage extends AppCompatActivity implements AdapterView.OnItem
 
 
     //create method for starting connection
-    //***remember the conncction will fail and app will crash if you haven't paired first
+    //***remember the conncetion will fail and app will crash if you haven't paired first
     public void startConnection(){
         startBTConnection(mBTDevice,MY_UUID_INSECURE);
     }
@@ -530,10 +529,14 @@ public class ControlPage extends AppCompatActivity implements AdapterView.OnItem
             IntentFilter BTIntent = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
             registerReceiver(mBroadcastReceiver1, BTIntent);
         }
+        else{
+            IntentFilter BTIntent = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
+            registerReceiver(mBroadcastReceiver1, BTIntent);
+        }
     }
 
     //region make discoverable (niet nodig)
-    public void btnEnableDisable_Discoverable(View view) {
+    /*public void btnEnableDisable_Discoverable(View view) {
         Log.d(TAG, "btnEnableDisable_Discoverable: Making device discoverable for 300 seconds.");
 
         Intent discoverableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
@@ -543,11 +546,11 @@ public class ControlPage extends AppCompatActivity implements AdapterView.OnItem
         IntentFilter intentFilter = new IntentFilter(mBluetoothAdapter.ACTION_SCAN_MODE_CHANGED);
         registerReceiver(mBroadcastReceiver2,intentFilter);
 
-    }
+    }*/
     //endregion
 
 
-    public void btnDiscover(/*View view*/) {
+    /*public void btnDiscover(View view) {
         Log.d(TAG, "btnDiscover: Looking for unpaired devices.");
 
         if(mBluetoothAdapter.isDiscovering()){
@@ -570,7 +573,7 @@ public class ControlPage extends AppCompatActivity implements AdapterView.OnItem
             IntentFilter discoverDevicesIntent = new IntentFilter(BluetoothDevice.ACTION_FOUND);
             registerReceiver(mBroadcastReceiver3, discoverDevicesIntent);
         }
-    }
+    }*/
 
     /**
      * This method is required for all devices running API23+
@@ -619,13 +622,29 @@ public class ControlPage extends AppCompatActivity implements AdapterView.OnItem
         super.onDestroy();
         Log.d(TAG, "onDestroy: called.");
         this.mWakeLock.release();
-        if(mBroadcastReceiver1 != null)
+        try {
             unregisterReceiver(mBroadcastReceiver1);
-        if(mBroadcastReceiver2 != null)
+        }
+        catch(IllegalArgumentException e){
+            Log.e(TAG, "onDestroy: BroadcastReceiver1",e );
+        }
+        /*try {
             unregisterReceiver(mBroadcastReceiver2);
-        if(mBroadcastReceiver3 != null)
+        }
+        catch(IllegalArgumentException e){
+            Log.e(TAG, "onDestroy: BroadcastReceiver2",e );
+        }*/
+        /*try {
             unregisterReceiver(mBroadcastReceiver3);
-        if(mBroadcastReceiver4 != null)
+        }
+        catch(IllegalArgumentException e){
+            Log.e(TAG, "onDestroy: BroadcastReceiver3",e );
+        }*/
+        try {
             unregisterReceiver(mBroadcastReceiver4);
+        }
+        catch(IllegalArgumentException e){
+            Log.e(TAG, "onDestroy: BroadcastReceiver4",e );
+        }
     }
 }
