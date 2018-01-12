@@ -346,21 +346,6 @@ public class ControlPage extends AppCompatActivity implements AdapterView.OnItem
         }
     }
 
-    @Override
-    protected void onDestroy(){
-        super.onDestroy();
-        Log.d(TAG, "onDestroy: called.");
-        this.mWakeLock.release();
-        if(mBroadcastReceiver1 != null)
-            unregisterReceiver(mBroadcastReceiver1);
-        if(mBroadcastReceiver2 != null)
-            unregisterReceiver(mBroadcastReceiver2);
-        if(mBroadcastReceiver3 != null)
-            unregisterReceiver(mBroadcastReceiver3);
-        if(mBroadcastReceiver4 != null)
-            unregisterReceiver(mBroadcastReceiver4);
-    }
-
     public static void popup(String message){
         int duration = Toast.LENGTH_SHORT;
         if(toast != null) {
@@ -527,7 +512,7 @@ public class ControlPage extends AppCompatActivity implements AdapterView.OnItem
      */
     public void startBTConnection(BluetoothDevice device, UUID uuid){
         Log.d(TAG, "startBTConnection: Initializing RFCOM Bluetooth Connection.");
-
+        mBluetoothConnection = new BluetoothConnectionService(ControlPage.this);
         mBluetoothConnection.startClient(device,uuid);
     }
 
@@ -627,5 +612,20 @@ public class ControlPage extends AppCompatActivity implements AdapterView.OnItem
             mBTDevice = mBTDevices.get(i);
             mBluetoothConnection = new BluetoothConnectionService(ControlPage.this);
         }
+    }
+
+    @Override
+    protected void onDestroy(){
+        super.onDestroy();
+        Log.d(TAG, "onDestroy: called.");
+        this.mWakeLock.release();
+        if(mBroadcastReceiver1 != null)
+            unregisterReceiver(mBroadcastReceiver1);
+        if(mBroadcastReceiver2 != null)
+            unregisterReceiver(mBroadcastReceiver2);
+        if(mBroadcastReceiver3 != null)
+            unregisterReceiver(mBroadcastReceiver3);
+        if(mBroadcastReceiver4 != null)
+            unregisterReceiver(mBroadcastReceiver4);
     }
 }
