@@ -8,11 +8,15 @@ import android.bluetooth.BluetoothSocket;
 import android.content.Context;
 import android.util.Log;
 
+import com.jabo.jabo.roommapper.ControlPage;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.util.UUID;
+
+import static com.google.android.gms.internal.zzagz.runOnUiThread;
 
 /**
  * Created by User on 12/21/2016.
@@ -252,6 +256,13 @@ public class BluetoothConnectionService {
                     bytes = mmInStream.read(buffer);
                     String incomingMessage = new String(buffer, 0, bytes);
                     Log.d(TAG, "InputStream: " + incomingMessage);
+                    final byte[] _buffer = buffer;
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            ControlPage.receiveBTMessage(_buffer);
+                        }
+                    });
                 } catch (IOException e) {
                     Log.e(TAG, "write: Error reading Input Stream. " + e.getMessage() );
                     break;

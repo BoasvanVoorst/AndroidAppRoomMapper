@@ -8,6 +8,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -43,11 +44,13 @@ public class ControlPage extends AppCompatActivity implements AdapterView.OnItem
     private static Toast toast;
     private static byte[] direction = new byte[1];
     private boolean run = false;
+    private SharedPreferences systemPreferences = this.getSharedPreferences("com.jabo.jabo.roommapper_preferences",MODE_PRIVATE);
 
     ImageButton ForwardButton;
     ImageButton BackwardButton;
     ImageButton LeftButton;
     ImageButton RightButton;
+    static ImageView engine;
 
     //region bt init
     BluetoothConnectionService mBluetoothConnection;
@@ -70,12 +73,16 @@ public class ControlPage extends AppCompatActivity implements AdapterView.OnItem
         final Activity var = this;
         Context context = getApplicationContext();
         this.context =context;
-
+        engine = engine = (ImageView) findViewById(R.id.engineImage);
         //region Wakelock
+
         Log.d(TAG, "onCreate: Powermanager");
         final PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
-        this.mWakeLock = pm.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK,"wakescreen");
-        this.mWakeLock.acquire();
+        this.mWakeLock = pm.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK, "wakescreen");
+
+        if(systemPreferences.getBoolean("screen_awake",true)) {
+            this.mWakeLock.acquire();
+        }
         //endregion
 
         //region buttons init
@@ -321,7 +328,7 @@ public class ControlPage extends AppCompatActivity implements AdapterView.OnItem
     }
 
     public void connectDevice(){
-        String btdeviceName = "JaBo";
+        String btdeviceName = systemPreferences.getString("Device_Name","JaBo");
         Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
         if (pairedDevices.size() > 0) {
             // There are paired devices. Get the name and address of each paired device.
@@ -424,8 +431,7 @@ public class ControlPage extends AppCompatActivity implements AdapterView.OnItem
         }
     }
 
-    public void EngineOn(boolean state){
-        ImageView engine = (ImageView) findViewById(R.id.engineImage);
+    public static void EngineOn(boolean state){
         if(state){
             engine.setImageResource(android.R.drawable.presence_online);
         }
@@ -683,7 +689,7 @@ public class ControlPage extends AppCompatActivity implements AdapterView.OnItem
 
     @Override
     protected void onDestroy(){
-        super.onDestroy();
+        if(systemPreferences.getBoolean("screen_awake",true)) super.onDestroy();
         Log.d(TAG, "onDestroy: called.");
         this.mWakeLock.release();
         try {
@@ -709,6 +715,15 @@ public class ControlPage extends AppCompatActivity implements AdapterView.OnItem
         }
         catch(IllegalArgumentException e){
             Log.e(TAG, "onDestroy: BroadcastReceiver4",e );
+        }
+    }
+
+    public static void receiveBTMessage(byte[] message){
+        if((message[0]&0b00000001) == 0b00000001){
+            EngineOn(true);
+        }
+        else{
+            EngineOn(false);
         }
     }
 }

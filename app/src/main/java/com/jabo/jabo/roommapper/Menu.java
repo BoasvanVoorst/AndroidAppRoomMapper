@@ -37,11 +37,11 @@ public class Menu extends AppCompatActivity {
         }
 
         Button settingspage = (Button) findViewById(R.id.SettingsButton);
-        settingspage.setEnabled(false); //TODO settingspage deactivated
     }
 
     public void SettingsPage(View view){
-
+        Intent intent = new Intent(this,Settings.class);
+        startActivity(intent);
     }
 
     public void MapPage(View view){

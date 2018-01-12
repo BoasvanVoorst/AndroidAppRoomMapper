@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory
+        android:defaultValue="screen"
+        android:title="Preference category">
+
+        <SwitchPreference
+            android:defaultValue="true"
+            android:key="screen_awake"
+            android:title="screen stays on" />
+    </PreferenceCategory>
+    <PreferenceCategory
+        android:defaultValue="Bluetooth"
+        android:title="Preference category">
+
+        <EditTextPreference
+            android:defaultValue="JaBo"
+            android:inputType="text"
+            android:key="Device_Name"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:title="Device Name" />
+    </PreferenceCategory>
+    <PreferenceCategory
+        android:defaultValue="Network"
+        android:title="Preference category">
+
+        <EditTextPreference
+            android:defaultValue="192.168.101.11"
+            android:inputType="number"
+            android:key="ipadres"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:title="ServerAdres" />
+    </PreferenceCategory>
+</PreferenceScreen>

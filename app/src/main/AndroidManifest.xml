@@ -38,6 +38,10 @@
             android:name=".ControlPage"
             android:parentActivityName=".Menu"
             android:screenOrientation="portrait" />
+        <activity
+            android:name=".Settings"
+            android:parentActivityName=".Menu"
+            android:screenOrientation="portrait"/>
     </application>
 
 </manifest>
