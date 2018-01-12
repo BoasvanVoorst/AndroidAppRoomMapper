@@ -260,13 +260,8 @@ public class BluetoothConnectionService {
         }
 
         //Call this from the main activity to send data to the remote device
-        public void write(byte[] bytes) {
-            Log.d(TAG, "write: Writing to outputstream: " + bytes[0]);
-            try {
-                mmOutStream.write(bytes);
-            } catch (IOException e) {
-                Log.e(TAG, "write: Error writing to output stream. " + e.getMessage() );
-            }
+        public void write(byte[] bytes) throws IOException{
+            mmOutStream.write(bytes);
         }
 
         /* Call this from the main activity to shutdown the connection */
@@ -291,7 +286,7 @@ public class BluetoothConnectionService {
      * @param out The bytes to write
      * @see ConnectedThread#write(byte[])
      */
-    public void write(byte[] out) {
+    public void write(byte[] out) throws IOException{
         // Create temporary object
         ConnectedThread r;
 

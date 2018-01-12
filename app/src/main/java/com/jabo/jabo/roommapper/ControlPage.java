@@ -1,7 +1,6 @@
 package com.jabo.jabo.roommapper;
 
 import android.Manifest;
-import android.annotation.TargetApi;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -10,9 +9,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Build;
-import android.os.Handler;
-import android.os.Looper;
-import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -29,6 +25,8 @@ import android.os.PowerManager;
 
 import com.jabo.jabo.BT.BluetoothConnectionService;
 
+import java.io.IOException;
+import java.net.ConnectException;
 import java.util.ArrayList;
 import java.util.Set;
 import java.util.UUID;
@@ -43,7 +41,7 @@ public class ControlPage extends AppCompatActivity implements AdapterView.OnItem
 
     private static Context context;
     private static Toast toast;
-    private static byte[] direction = new byte[1024];
+    private static byte[] direction = new byte[1];
     private boolean run = false;
 
     ImageButton ForwardButton;
@@ -62,7 +60,7 @@ public class ControlPage extends AppCompatActivity implements AdapterView.OnItem
 
     public ArrayList<BluetoothDevice> mBTDevices = new ArrayList<>();
 
-    public DeviceListAdapter mDeviceListAdapter;
+    //public DeviceListAdapter mDeviceListAdapter;
     //endregion
 
     @Override
@@ -105,7 +103,15 @@ public class ControlPage extends AppCompatActivity implements AdapterView.OnItem
                         Log.d(TAG, "onTouch: forward");
                         direction[0] = 3;
                     }
-                    mBluetoothConnection.write(direction);
+                    try {
+                        mBluetoothConnection.write(direction);
+                    }catch (ConnectException e){
+                        popup("turn on device please");
+                    }
+                    catch (Exception e) {
+                        popup("Cant send to device");
+                        connectDevice();
+                    }
                 }
                 else if(event.getAction() == MotionEvent.ACTION_UP){
                     BackwardButton.setEnabled(true);
@@ -121,7 +127,14 @@ public class ControlPage extends AppCompatActivity implements AdapterView.OnItem
                         Log.d(TAG, "onTouch: halt");
                         direction[0] = 0;
                     }
-                    mBluetoothConnection.write(direction);
+                    try {
+                        mBluetoothConnection.write(direction);
+                    }catch (ConnectException e){
+                        popup("turn on device please");
+                    } catch (Exception e) {
+                        popup("Cant send to device");
+                        connectDevice();
+                    }
                 }
                 return false;
             }
@@ -147,7 +160,14 @@ public class ControlPage extends AppCompatActivity implements AdapterView.OnItem
                         Log.d(TAG, "onTouch: backward");
                         direction[0] = 7;
                     }
-                    mBluetoothConnection.write(direction);
+                    try {
+                        mBluetoothConnection.write(direction);
+                    } catch (ConnectException e){
+                        popup("turn on device please");
+                    } catch (Exception e){
+                        popup("Cant send to device");
+                        connectDevice();
+                    }
                 }
                 else if(event.getAction() == MotionEvent.ACTION_UP){
                     ForwardButton.setEnabled(true);
@@ -163,7 +183,14 @@ public class ControlPage extends AppCompatActivity implements AdapterView.OnItem
                         Log.d(TAG, "onTouch: halt");
                         direction[0] = 0;
                     }
-                    mBluetoothConnection.write(direction);
+                    try {
+                        mBluetoothConnection.write(direction);
+                    } catch (ConnectException e){
+                        popup("turn on device please");
+                    } catch (Exception e) {
+                        popup("Cant send to device");
+                        connectDevice();
+                    }
                 }
                 return false;
             }
@@ -188,7 +215,14 @@ public class ControlPage extends AppCompatActivity implements AdapterView.OnItem
                         Log.d(TAG, "onTouch: right");
                         direction[0] = 5;
                     }
-                    mBluetoothConnection.write(direction);
+                    try {
+                        mBluetoothConnection.write(direction);
+                    } catch (ConnectException e){
+                        popup("turn on device please");
+                    } catch (Exception e) {
+                        popup("Cant send to device");
+                        connectDevice();
+                    }
                 }
                 else if(event.getAction() == MotionEvent.ACTION_UP){
                     LeftButton.setEnabled(true);
@@ -204,7 +238,14 @@ public class ControlPage extends AppCompatActivity implements AdapterView.OnItem
                         Log.d(TAG, "onTouch: halt");
                         direction[0] = 0;
                     }
-                    mBluetoothConnection.write(direction);
+                    try {
+                        mBluetoothConnection.write(direction);
+                    } catch (ConnectException e){
+                        popup("turn on device please");
+                    } catch (Exception e) {
+                        popup("Cant send to device");
+                        connectDevice();
+                    }
                 }
                 return false;
             }
@@ -229,7 +270,14 @@ public class ControlPage extends AppCompatActivity implements AdapterView.OnItem
                         Log.d(TAG, "onTouch: left");
                         direction[0] = 1;
                     }
-                    mBluetoothConnection.write(direction);
+                    try {
+                        mBluetoothConnection.write(direction);
+                    } catch (ConnectException e){
+                        popup("turn on device please");
+                    } catch (Exception e) {
+                        popup("Cant send to device");
+                        connectDevice();
+                    }
                 }
                 else if(event.getAction() == MotionEvent.ACTION_UP){
                     RightButton.setEnabled(true);
@@ -245,7 +293,14 @@ public class ControlPage extends AppCompatActivity implements AdapterView.OnItem
                         Log.d(TAG, "onTouch: halt");
                         direction[0] = 0;
                     }
-                    mBluetoothConnection.write(direction);
+                    try {
+                        mBluetoothConnection.write(direction);
+                    } catch (ConnectException e){
+                        popup("turn on device please");
+                    } catch (Exception e) {
+                        popup("Cant send to device");
+                        connectDevice();
+                    }
                 }
                 return false;
             }
@@ -262,6 +317,10 @@ public class ControlPage extends AppCompatActivity implements AdapterView.OnItem
 
         enableDisableBT();
 
+        connectDevice();
+    }
+
+    public void connectDevice(){
         String btdeviceName = "JaBo";
         Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
         if (pairedDevices.size() > 0) {
@@ -334,7 +393,13 @@ public class ControlPage extends AppCompatActivity implements AdapterView.OnItem
         {
             popup("stopped");
             run = false;
-            mBluetoothConnection.write(message);
+            try {
+                mBluetoothConnection.write(message);
+            } catch (ConnectException e){
+                popup("turn on device please");
+            } catch (Exception e) {
+                popup("Cant send to device");
+            }
             samplesButtonadd.setEnabled(true);
             samplesButtonmin.setEnabled(true);
             RoomName.setEnabled(true);
@@ -387,7 +452,6 @@ public class ControlPage extends AppCompatActivity implements AdapterView.OnItem
             // When discovery finds a device
             if (action.equals(mBluetoothAdapter.ACTION_STATE_CHANGED)) {
                 final int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, mBluetoothAdapter.ERROR);
-
                 switch(state){
                     case BluetoothAdapter.STATE_OFF:
                         Log.d(TAG, "onReceive: STATE OFF");

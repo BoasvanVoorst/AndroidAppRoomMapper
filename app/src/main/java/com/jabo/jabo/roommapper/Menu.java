@@ -36,22 +36,12 @@ public class Menu extends AppCompatActivity {
             img.setImageResource(button_onoff_indicator_off);
         }
 
-        findViewById(R.id.SettingsButton).setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View v) {
-                Intent intent = new Intent(var,testActivity.class);
-                startActivity(intent);
-                return true;
-            }
-        });
-
         Button settingspage = (Button) findViewById(R.id.SettingsButton);
-        //settingspage.setEnabled(false); //TODO settingspage deactivated
+        settingspage.setEnabled(false); //TODO settingspage deactivated
     }
 
     public void SettingsPage(View view){
-        Intent intent = new Intent(this,Settings.class);
-        startActivity(intent);
+
     }
 
     public void MapPage(View view){

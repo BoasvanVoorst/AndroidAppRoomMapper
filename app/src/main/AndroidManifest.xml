@@ -31,10 +31,6 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".Settings"
-            android:parentActivityName=".Menu"
-            android:screenOrientation="portrait" />
-        <activity
             android:name=".MappingPage"
             android:parentActivityName=".Menu"
             android:screenOrientation="portrait" />
@@ -42,7 +38,6 @@
             android:name=".ControlPage"
             android:parentActivityName=".Menu"
             android:screenOrientation="portrait" />
-        <activity android:name=".testActivity"></activity>
     </application>
 
 </manifest>
