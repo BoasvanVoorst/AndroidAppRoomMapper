@@ -146,7 +146,7 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintStart_toEndOf="@+id/sensor5"
         app:layout_constraintTop_toTopOf="@+id/voertuigIMG"
-        app:srcCompat="@android:color/holo_red_dark" />
+        app:srcCompat="@android:color/holo_green_dark" />
 
     <ImageView
         android:id="@+id/sensor1"

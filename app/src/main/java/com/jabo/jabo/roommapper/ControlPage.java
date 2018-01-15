@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -46,11 +47,19 @@ public class ControlPage extends AppCompatActivity implements AdapterView.OnItem
     private boolean run = false;
     private SharedPreferences systemPreferences;
 
+    private byte[] receivedMessage = new byte[10];
+
     ImageButton ForwardButton;
     ImageButton BackwardButton;
     ImageButton LeftButton;
     ImageButton RightButton;
     static ImageView engine;
+    static ImageView sensor1;
+    static ImageView sensor2;
+    static ImageView sensor3;
+    static ImageView sensor4;
+    static ImageView sensor5;
+    static ImageView Sensors[] = {sensor1,sensor2,sensor3,sensor4,sensor5};
 
     //TODO reconnect crashes app
 
@@ -75,6 +84,11 @@ public class ControlPage extends AppCompatActivity implements AdapterView.OnItem
         Context context = getApplicationContext();
         this.context =context;
         engine = (ImageView) findViewById(R.id.engineImage);
+        sensor1 = (ImageView)findViewById(R.id.sensor1);
+        sensor2 = (ImageView)findViewById(R.id.sensor2);
+        sensor3 = (ImageView)findViewById(R.id.sensor3);
+        sensor4 = (ImageView)findViewById(R.id.sensor4);
+        sensor5 = (ImageView)findViewById(R.id.sensor5);
         systemPreferences = this.getSharedPreferences("com.jabo.jabo.roommapper_preferences",MODE_PRIVATE);
         //region Wakelock
 
@@ -443,13 +457,7 @@ public class ControlPage extends AppCompatActivity implements AdapterView.OnItem
         }
     }
 
-    public void updateSensor(int color, int wich_sensor){
-        ImageView sensor1 = (ImageView)findViewById(R.id.sensor1);
-        ImageView sensor2 = (ImageView)findViewById(R.id.sensor2);
-        ImageView sensor3 = (ImageView)findViewById(R.id.sensor3);
-        ImageView sensor4 = (ImageView)findViewById(R.id.sensor4);
-        ImageView sensor5 = (ImageView)findViewById(R.id.sensor5);
-        ImageView Sensors[] = {sensor1,sensor2,sensor3,sensor4,sensor5};
+    public static void updateSensor(int color, int wich_sensor){
         Sensors[wich_sensor-1].setBackgroundColor(color);
     }
 
@@ -586,11 +594,76 @@ public class ControlPage extends AppCompatActivity implements AdapterView.OnItem
     }
 
     public static void receiveBTMessage(byte[] message){
-        if((message[0]&0b00000001) == 0b00000001){
-            EngineOn(true);
-        }
-        else{
-            EngineOn(false);
+        int sensor = 0;
+        if((message[0]&0b10101111) == 0b10101111){
+
+            if((message[1]&0b10000000) == 0b10000000){ // motor active
+                EngineOn(true);
+            }
+            else{
+                EngineOn(false);
+            }
+
+            switch (message[1]&0b00011111){// sensor number
+                case 0b00000000:
+                    sensor = 0;
+                    break;
+                case 0b00000001:
+                    sensor = 1;
+                    break;
+                case 0b00000010:
+                    sensor = 2;
+                    break;
+                case 0b00000100:
+                    sensor = 3;
+                    break;
+                case 0b00001000:
+                    sensor = 4;
+                    break;
+                case 0b00010000:
+                    sensor = 5;
+                    break;
+            }
+
+            switch (message[2]&0b00000111){ // sensor zone // 40 - 20 groen // oranje // rood //
+                case 0b00000001: //zone 1 (10 cm)
+                    updateSensor(R.color.RED,sensor);
+                    break;
+                case 0b00000010: //zone 2 (10 - 30 cm)
+                    updateSensor(R.color.ORANGE,sensor);
+                    break;
+                case 0b00000011: //zone 3 (30 -50)
+                    updateSensor(R.color.YELLOW,sensor);
+                    break;
+                case 0b00000100: //zone 4 // 50<
+                    updateSensor(R.color.GREEN,sensor);
+                    break;
+                case 0b00000101: //zone 5 not used
+                    break;
+            }
+
+            // richting blokeren waar rood wordt gedetecteerd
+
+            switch (message[2]>>4){ // direction
+                case 0:
+                    break;
+                case 1:
+                    break;
+                case 2:
+                    break;
+                case 3:
+                    break;
+                case 4:
+                    break;
+                case 5:
+                    break;
+                case 6:
+                    break;
+                case 7:
+                    break;
+                case 8:
+                    break;
+            }
         }
     }
 }
