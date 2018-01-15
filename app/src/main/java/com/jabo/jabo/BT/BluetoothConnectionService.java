@@ -33,13 +33,14 @@ public class BluetoothConnectionService {
     Context mContext;
 
     private AcceptThread mInsecureAcceptThread;
-
+    private ConnectedThread mConnectedThread;
     private ConnectThread mConnectThread;
+
     private BluetoothDevice mmDevice;
+
+
     private UUID deviceUUID;
     ProgressDialog mProgressDialog;
-
-    private ConnectedThread mConnectedThread;
 
     public BluetoothConnectionService(Context context) {
         mContext = context;
@@ -305,6 +306,15 @@ public class BluetoothConnectionService {
         Log.d(TAG, "write: Write Called.");
         //perform the write
         mConnectedThread.write(out);
+    }
+
+    public synchronized void cancel(){
+        if(mConnectedThread != null)
+            mConnectedThread.cancel();
+        if(mConnectThread != null)
+            mConnectThread.cancel();
+        if(mInsecureAcceptThread != null)
+            mInsecureAcceptThread.cancel();
     }
 
 }
