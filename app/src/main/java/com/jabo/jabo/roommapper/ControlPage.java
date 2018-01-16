@@ -1,6 +1,5 @@
 package com.jabo.jabo.roommapper;
 
-import android.Manifest;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -9,7 +8,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.graphics.Color;
 import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -39,6 +37,11 @@ import static android.R.drawable.button_onoff_indicator_on;
 public class ControlPage extends AppCompatActivity implements AdapterView.OnItemClickListener{
     private final String TAG = "ControlPage";
 
+    private static int message_distance = 10;
+
+    private final int X = 0;
+    private final int Y = 1;
+
     protected PowerManager.WakeLock mWakeLock;
 
     private static Context context;
@@ -53,6 +56,7 @@ public class ControlPage extends AppCompatActivity implements AdapterView.OnItem
     ImageButton BackwardButton;
     ImageButton LeftButton;
     ImageButton RightButton;
+    private static int degree=0;
     static ImageView engine;
     static ImageView sensor1;
     static ImageView sensor2;
@@ -76,6 +80,9 @@ public class ControlPage extends AppCompatActivity implements AdapterView.OnItem
 
     //endregion
 
+    static boolean sending = true;
+
+    Thread sendThread;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -126,18 +133,35 @@ public class ControlPage extends AppCompatActivity implements AdapterView.OnItem
                         Log.d(TAG, "onTouch: forward");
                         direction[0] = 3;
                     }
-                    try {
-                        mBluetoothConnection.write(direction);
-                    }catch (ConnectException e){
-                        popup("turn on device please");
-                    }
-                    catch (Exception e) {
-                        popup("Cant send to device");
-                        connectDevice();
-                    }
+                    sending = true;
+                    sendThread = new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Log.d(TAG, "run: sendThread started");
+                            while(sending) {
+                                try {
+                                    mBluetoothConnection.write(direction);
+                                    try {
+                                        sendThread.sleep(100);
+                                    }
+                                    catch(InterruptedException e){
+
+                                    }
+                                    Log.d(TAG, "run: sending" + direction);
+                                }
+                                catch (IOException e){
+                                    //Log.e(TAG, "run: sendThread: ", e );
+                                }
+                            }
+                        }
+                    });
+                    sendThread.start();
+                    //mBluetoothConnection.write(direction);
                 }
                 else if(event.getAction() == MotionEvent.ACTION_UP){
                     BackwardButton.setEnabled(true);
+                    sending = false;
+                    sendThread=null;
                     if(RightButton.isPressed()) {
                         Log.d(TAG, "onTouch: Right");
                         direction[0] = 5;
@@ -183,17 +207,34 @@ public class ControlPage extends AppCompatActivity implements AdapterView.OnItem
                         Log.d(TAG, "onTouch: backward");
                         direction[0] = 7;
                     }
-                    try {
-                        mBluetoothConnection.write(direction);
-                    } catch (ConnectException e){
-                        popup("turn on device please");
-                    } catch (Exception e){
-                        popup("Cant send to device");
-                        connectDevice();
-                    }
+                    sending = true;
+                    sendThread = new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Log.d(TAG, "run: sendThread started");
+                            while(sending) {
+                                try {
+                                    mBluetoothConnection.write(direction);
+                                    try {
+                                        sendThread.sleep(100);
+                                    }
+                                    catch(InterruptedException e){
+
+                                    }
+                                    Log.d(TAG, "run: sending" + direction);
+                                }
+                                catch (IOException e){
+                                    Log.e(TAG, "run: sendThread: ", e );
+                                }
+                            }
+                        }
+                    });
+                    sendThread.start();
                 }
                 else if(event.getAction() == MotionEvent.ACTION_UP){
                     ForwardButton.setEnabled(true);
+                    sending = false;
+                    sendThread=null;
                     if(RightButton.isPressed()) {
                         Log.d(TAG, "onTouch: right");
                         direction[0] = 5;
@@ -238,17 +279,34 @@ public class ControlPage extends AppCompatActivity implements AdapterView.OnItem
                         Log.d(TAG, "onTouch: right");
                         direction[0] = 5;
                     }
-                    try {
-                        mBluetoothConnection.write(direction);
-                    } catch (ConnectException e){
-                        popup("turn on device please");
-                    } catch (Exception e) {
-                        popup("Cant send to device");
-                        connectDevice();
-                    }
+                    sending = true;
+                    sendThread = new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Log.d(TAG, "run: sendThread started");
+                            while(sending) {
+                                try {
+                                    mBluetoothConnection.write(direction);
+                                    try {
+                                        sendThread.sleep(100);
+                                    }
+                                    catch(InterruptedException e){
+
+                                    }
+                                    Log.d(TAG, "run: sending" + direction);
+                                }
+                                catch (IOException e){
+                                    Log.e(TAG, "run: sendThread: ", e );
+                                }
+                            }
+                        }
+                    });
+                    sendThread.start();
                 }
                 else if(event.getAction() == MotionEvent.ACTION_UP){
                     LeftButton.setEnabled(true);
+                    sending = false;
+                    sendThread = null;
                     if(ForwardButton.isPressed()){
                         direction[0] = 3;
                         Log.d(TAG, "onTouch: forward");
@@ -293,17 +351,34 @@ public class ControlPage extends AppCompatActivity implements AdapterView.OnItem
                         Log.d(TAG, "onTouch: left");
                         direction[0] = 1;
                     }
-                    try {
-                        mBluetoothConnection.write(direction);
-                    } catch (ConnectException e){
-                        popup("turn on device please");
-                    } catch (Exception e) {
-                        popup("Cant send to device");
-                        connectDevice();
-                    }
+                    sending = true;
+                    sendThread = new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Log.d(TAG, "run: sendThread started");
+                            while(sending) {
+                                try {
+                                    mBluetoothConnection.write(direction);
+                                    try {
+                                        sendThread.sleep(100);
+                                    }
+                                    catch(InterruptedException e){
+
+                                    }
+                                    Log.d(TAG, "run: sending" + direction);
+                                }
+                                catch (IOException e){
+                                    Log.e(TAG, "run: sendThread: ", e );
+                                }
+                            }
+                        }
+                    });
+                    sendThread.start();
                 }
                 else if(event.getAction() == MotionEvent.ACTION_UP){
                     RightButton.setEnabled(true);
+                    sending = false;
+                    sendThread = null;
                     if(ForwardButton.isPressed()){
                         direction[0] = 3;
                         Log.d(TAG, "onTouch: forward");
@@ -595,6 +670,7 @@ public class ControlPage extends AppCompatActivity implements AdapterView.OnItem
 
     public static void receiveBTMessage(byte[] message){
         int sensor = 0;
+        boolean drive = false;
         if((message[0]&0b10101111) == 0b10101111){
 
             if((message[1]&0b10000000) == 0b10000000){ // motor active
@@ -602,6 +678,13 @@ public class ControlPage extends AppCompatActivity implements AdapterView.OnItem
             }
             else{
                 EngineOn(false);
+            }
+
+            if((message[1]&0b01000000)==0b01000000){
+                drive = true;
+            }
+            else{
+                drive = false;
             }
 
             switch (message[1]&0b00011111){// sensor number
@@ -645,23 +728,135 @@ public class ControlPage extends AppCompatActivity implements AdapterView.OnItem
             // richting blokeren waar rood wordt gedetecteerd
 
             switch (message[2]>>4){ // direction
-                case 0:
+                case 0: // halt
                     break;
-                case 1:
+                case 1: // links
+                    switch (degree){        // check the current direction and change it with a new direction
+                        case 0:
+                            degree = 270;
+                            break;
+                        case 45:
+                            degree = 315;
+                            break;
+                        case 90:
+                            degree = 0;
+                            break;
+                        case 135:
+                            degree = 45;
+                            break;
+                        case 180:
+                            degree = 90;
+                            break;
+                        case 225:
+                            degree = 135;
+                            break;
+                        case 270:
+                            degree = 180;
+                            break;
+                        case 315:
+                            degree = 225;
+                            break;
+                    }
                     break;
-                case 2:
+                case 2: // vooruit links
+
                     break;
-                case 3:
+                case 3: // vooruit
+                    if(drive){
+                        switch (degree){
+                            case 0:
+                                // add to y
+                                break;
+                            case 45:
+                                // add to x and y
+                                break;
+                            case 90:
+                                // add to y
+                                break;
+                            case 135:
+                                // min to y and add to x
+                                break;
+                            case 180:
+                                // min to y
+                                break;
+                            case 225:
+                                // min to x and y
+                                break;
+                            case 270:
+                                // min to x
+                                break;
+                            case 315:
+                                // min to x and add to y
+                                break;
+                        }
+                    }
                     break;
-                case 4:
+                case 4: // vooruit rechts
+
                     break;
-                case 5:
+                case 5: // rechts
+                    switch (degree){
+                        case 0:
+                            degree = 90;
+                            break;
+                        case 45:
+                            degree = 135;
+                            break;
+                        case 90:
+                            degree = 180;
+                            break;
+                        case 135:
+                            degree = 225;
+                            break;
+                        case 180:
+                            degree = 270;
+                            break;
+                        case 225:
+                            degree = 315;
+                            break;
+                        case 270:
+                            degree = 0;
+                            break;
+                        case 315:
+                            degree = 45;
+                            break;
+                    }
                     break;
-                case 6:
+                case 6: // achteruit rechts
+
                     break;
-                case 7:
+                case 7: // achteruit
+                    if(drive){
+                        switch (degree){
+                            case 0:
+                                // min to y
+                                break;
+                            case 45:
+                                // min to x and y
+                                break;
+                            case 90:
+                                // min to y
+                                break;
+                            case 135:
+                                // add to y and min to x
+                                break;
+                            case 180:
+                                // add to y
+                                break;
+                            case 225:
+                                // add to x and y
+                                break;
+                            case 270:
+                                // add to x
+                                break;
+                            case 315:
+                                // add to x and min to y
+                                break;
+                        }
+                    }
                     break;
-                case 8:
+                case 8: // achteruit links
+
                     break;
             }
         }
