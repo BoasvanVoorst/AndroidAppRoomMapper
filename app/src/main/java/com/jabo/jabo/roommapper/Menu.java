@@ -19,6 +19,8 @@ public class Menu extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_menu);
 
+        TcpClient.SERVER_IP = this.getSharedPreferences("com.jabo.jabo.roommapper_preferences",MODE_PRIVATE).getString("ipadres","192.168.101.11");
+
         new ConnectTask().execute("");
 
         // wifi verbinding

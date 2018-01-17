@@ -32,13 +32,10 @@ import java.util.ArrayList;
 import java.util.Set;
 import java.util.UUID;
 
-import static android.R.drawable.button_onoff_indicator_off;
-import static android.R.drawable.button_onoff_indicator_on;
-
 public class ControlPage extends AppCompatActivity implements AdapterView.OnItemClickListener{
     private final String TAG = "ControlPage";
 
-    private static int message_distance = 10;
+    private static int message_distance = 5;
 
     private final static int X = 0;
     private final static int Y = 1;
@@ -895,6 +892,7 @@ public class ControlPage extends AppCompatActivity implements AdapterView.OnItem
             }
         }
     }
+
     public static void BTON(boolean state){
         if(state) BT.setImageResource(android.R.drawable.button_onoff_indicator_on);
         else BT.setImageResource(android.R.drawable.button_onoff_indicator_off);
