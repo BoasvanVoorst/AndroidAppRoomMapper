@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.media.Image;
 import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -39,23 +40,26 @@ public class ControlPage extends AppCompatActivity implements AdapterView.OnItem
 
     private static int message_distance = 10;
 
-    private final int X = 0;
-    private final int Y = 1;
+    private final static int X = 0;
+    private final static int Y = 1;
+    private static int[][] coords = new int[2][];
+    private static int coordnumber = 0;
 
     protected PowerManager.WakeLock mWakeLock;
 
     private static Context context;
     private static Toast toast;
     private static byte[] direction = new byte[1];
-    private boolean run = false;
+    private static boolean run = false;
     private SharedPreferences systemPreferences;
 
     private byte[] receivedMessage = new byte[10];
 
-    ImageButton ForwardButton;
-    ImageButton BackwardButton;
-    ImageButton LeftButton;
-    ImageButton RightButton;
+    static ImageButton ForwardButton;
+    static ImageButton BackwardButton;
+    static ImageButton LeftButton;
+    static ImageButton RightButton;
+    static ImageView BT;
     private static int degree=0;
     static ImageView engine;
     static ImageView sensor1;
@@ -96,6 +100,7 @@ public class ControlPage extends AppCompatActivity implements AdapterView.OnItem
         sensor3 = (ImageView)findViewById(R.id.sensor3);
         sensor4 = (ImageView)findViewById(R.id.sensor4);
         sensor5 = (ImageView)findViewById(R.id.sensor5);
+        BT = (ImageView) findViewById(R.id.Bluetooth);
         systemPreferences = this.getSharedPreferences("com.jabo.jabo.roommapper_preferences",MODE_PRIVATE);
         //region Wakelock
 
@@ -142,12 +147,12 @@ public class ControlPage extends AppCompatActivity implements AdapterView.OnItem
                                 try {
                                     mBluetoothConnection.write(direction);
                                     try {
-                                        sendThread.sleep(100);
+                                        sendThread.sleep(50);
                                     }
                                     catch(InterruptedException e){
 
                                     }
-                                    Log.d(TAG, "run: sending" + direction);
+                                    //Log.d(TAG, "run: sending" + direction);
                                 }
                                 catch (IOException e){
                                     //Log.e(TAG, "run: sendThread: ", e );
@@ -216,15 +221,15 @@ public class ControlPage extends AppCompatActivity implements AdapterView.OnItem
                                 try {
                                     mBluetoothConnection.write(direction);
                                     try {
-                                        sendThread.sleep(100);
+                                        sendThread.sleep(50);
                                     }
                                     catch(InterruptedException e){
 
                                     }
-                                    Log.d(TAG, "run: sending" + direction);
+                                    //Log.d(TAG, "run: sending" + direction);
                                 }
                                 catch (IOException e){
-                                    Log.e(TAG, "run: sendThread: ", e );
+                                    //Log.e(TAG, "run: sendThread: ", e );
                                 }
                             }
                         }
@@ -288,15 +293,15 @@ public class ControlPage extends AppCompatActivity implements AdapterView.OnItem
                                 try {
                                     mBluetoothConnection.write(direction);
                                     try {
-                                        sendThread.sleep(100);
+                                        sendThread.sleep(50);
                                     }
                                     catch(InterruptedException e){
 
                                     }
-                                    Log.d(TAG, "run: sending" + direction);
+                                    //Log.d(TAG, "run: sending" + direction);
                                 }
                                 catch (IOException e){
-                                    Log.e(TAG, "run: sendThread: ", e );
+                                    //Log.e(TAG, "run: sendThread: ", e );
                                 }
                             }
                         }
@@ -360,15 +365,15 @@ public class ControlPage extends AppCompatActivity implements AdapterView.OnItem
                                 try {
                                     mBluetoothConnection.write(direction);
                                     try {
-                                        sendThread.sleep(100);
+                                        sendThread.sleep(50);
                                     }
                                     catch(InterruptedException e){
 
                                     }
-                                    Log.d(TAG, "run: sending" + direction);
+                                    //Log.d(TAG, "run: sending" + direction);
                                 }
                                 catch (IOException e){
-                                    Log.e(TAG, "run: sendThread: ", e );
+                                    //Log.e(TAG, "run: sendThread: ", e );
                                 }
                             }
                         }
@@ -453,7 +458,7 @@ public class ControlPage extends AppCompatActivity implements AdapterView.OnItem
 
     private void start(){
         byte[] message = new byte[1];
-        message[0]=(byte)0xAA;
+        message[0]=(byte)0b10000000;
         Button samplesButtonadd = (Button) findViewById(R.id.addSample);
         Button samplesButtonmin = (Button) findViewById(R.id.minsample);
         TextView RoomName = (TextView) findViewById(R.id.RoomName);
@@ -670,7 +675,8 @@ public class ControlPage extends AppCompatActivity implements AdapterView.OnItem
 
     public static void receiveBTMessage(byte[] message){
         int sensor = 0;
-        boolean drive = false;
+        boolean Ldrive;
+        boolean Rdrive;
         if((message[0]&0b10101111) == 0b10101111){
 
             if((message[1]&0b10000000) == 0b10000000){ // motor active
@@ -681,10 +687,17 @@ public class ControlPage extends AppCompatActivity implements AdapterView.OnItem
             }
 
             if((message[1]&0b01000000)==0b01000000){
-                drive = true;
+                Ldrive = true;
             }
             else{
-                drive = false;
+                Ldrive = false;
+            }
+
+            if((message[1]&0b00100000)==0b00100000){
+                Rdrive = true;
+            }
+            else{
+                Rdrive = false;
             }
 
             switch (message[1]&0b00011111){// sensor number
@@ -725,10 +738,11 @@ public class ControlPage extends AppCompatActivity implements AdapterView.OnItem
                     break;
             }
 
-            // richting blokeren waar rood wordt gedetecteerd
+            //TODO richting blokeren waar rood wordt gedetecteerd
 
             switch (message[2]>>4){ // direction
                 case 0: // halt
+                    //TODO
                     break;
                 case 1: // links
                     switch (degree){        // check the current direction and change it with a new direction
@@ -759,40 +773,48 @@ public class ControlPage extends AppCompatActivity implements AdapterView.OnItem
                     }
                     break;
                 case 2: // vooruit links
-
+                    //TODO
                     break;
                 case 3: // vooruit
-                    if(drive){
+                    if(Rdrive && Ldrive){ //TODO
                         switch (degree){
                             case 0:
                                 // add to y
+                                coords[Y][coordnumber] += message_distance;
+                                coordnumber++;
                                 break;
                             case 45:
-                                // add to x and y
+                                // add to x and y //TODO
                                 break;
                             case 90:
-                                // add to y
+                                // add to x
+                                coords[X][coordnumber] += message_distance;
+                                coordnumber++;
                                 break;
                             case 135:
-                                // min to y and add to x
+                                // min to y and add to x //TODO
                                 break;
                             case 180:
+                                coords[Y][coordnumber] += -message_distance;
+                                coordnumber++;
                                 // min to y
                                 break;
                             case 225:
-                                // min to x and y
+                                // min to x and y //TODO
                                 break;
                             case 270:
                                 // min to x
+                                coords[X][coordnumber] += -message_distance;
+                                coordnumber++;
                                 break;
                             case 315:
-                                // min to x and add to y
+                                // min to x and add to y //TODO
                                 break;
                         }
                     }
                     break;
                 case 4: // vooruit rechts
-
+                    //TODO
                     break;
                 case 5: // rechts
                     switch (degree){
@@ -823,42 +845,58 @@ public class ControlPage extends AppCompatActivity implements AdapterView.OnItem
                     }
                     break;
                 case 6: // achteruit rechts
-
+                    //TODO
                     break;
                 case 7: // achteruit
-                    if(drive){
+                    if(Rdrive && Ldrive){ //TODO
                         switch (degree){
                             case 0:
                                 // min to y
+                                coords[Y][coordnumber] += -message_distance;
+                                coordnumber++;
                                 break;
                             case 45:
-                                // min to x and y
+                                // min to x and y //TODO
                                 break;
                             case 90:
-                                // min to y
+                                // min to x
+                                coords[X][coordnumber] += -message_distance;
+                                coordnumber++;
                                 break;
                             case 135:
-                                // add to y and min to x
+                                // add to y and min to x //TODO
                                 break;
                             case 180:
                                 // add to y
+                                coords[Y][coordnumber] += message_distance;
+                                coordnumber++;
                                 break;
                             case 225:
-                                // add to x and y
+                                // add to x and y //TODO
                                 break;
                             case 270:
-                                // add to x
+                                coords[X][coordnumber] += -message_distance;
+                                coordnumber++;
                                 break;
                             case 315:
-                                // add to x and min to y
+                                // add to x and min to y //TODO
                                 break;
                         }
                     }
                     break;
                 case 8: // achteruit links
-
+                        //TODO
                     break;
             }
+            if(run){
+                if (ConnectTask.mTcpClient != null) {
+                    ConnectTask.mTcpClient.sendMessage(coords[X][coordnumber]+","+coords[Y][coordnumber]+"<DP>");
+                }
+            }
         }
+    }
+    public static void BTON(boolean state){
+        if(state) BT.setImageResource(android.R.drawable.button_onoff_indicator_on);
+        else BT.setImageResource(android.R.drawable.button_onoff_indicator_off);
     }
 }

@@ -149,6 +149,12 @@ public class BluetoothConnectionService {
                 // This is a blocking call and will only return on a
                 // successful connection or an exception
                 mmSocket.connect();
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        ControlPage.BTON(true);
+                    }
+                });
 
                 Log.d(TAG, "run: ConnectThread connected.");
             } catch (IOException e) {
@@ -159,6 +165,12 @@ public class BluetoothConnectionService {
                 } catch (IOException e1) {
                     Log.e(TAG, "mConnectThread: run: Unable to close connection in socket " + e1.getMessage());
                 }
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        ControlPage.BTON(false);
+                    }
+                });
                 Log.d(TAG, "run: ConnectThread: Could not connect to UUID: " + MY_UUID_INSECURE );
             }
 
