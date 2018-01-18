@@ -10,6 +10,8 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.media.Image;
 import android.os.Build;
+import android.support.v4.util.CircularArray;
+import android.support.v4.util.CircularIntArray;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -57,16 +59,14 @@ public class ControlPage extends AppCompatActivity implements AdapterView.OnItem
     static ImageButton LeftButton;
     static ImageButton RightButton;
     static ImageView BT;
-    private static int degree=0;
+    private static int degree = 0;
     static ImageView engine;
     static ImageView sensor1;
     static ImageView sensor2;
     static ImageView sensor3;
     static ImageView sensor4;
     static ImageView sensor5;
-    static ImageView Sensors[] = {sensor1,sensor2,sensor3,sensor4,sensor5};
-
-    //TODO reconnect crashes app
+    static ImageView Sensors[] = new ImageView[5];
 
     //region bt init
     BluetoothConnectionService mBluetoothConnection;
@@ -92,18 +92,18 @@ public class ControlPage extends AppCompatActivity implements AdapterView.OnItem
         Context context = getApplicationContext();
         this.context =context;
         engine = (ImageView) findViewById(R.id.engineImage);
-        sensor1 = (ImageView)findViewById(R.id.sensor1);
-        sensor2 = (ImageView)findViewById(R.id.sensor2);
-        sensor3 = (ImageView)findViewById(R.id.sensor3);
-        sensor4 = (ImageView)findViewById(R.id.sensor4);
-        sensor5 = (ImageView)findViewById(R.id.sensor5);
+        Sensors[0] = sensor1 = (ImageView)findViewById(R.id.sensor1);
+        Sensors[1] = sensor2 = (ImageView)findViewById(R.id.sensor2);
+        Sensors[2] = sensor3 = (ImageView)findViewById(R.id.sensor3);
+        Sensors[3] = sensor4 = (ImageView)findViewById(R.id.sensor4);
+        Sensors[4] = sensor5 = (ImageView)findViewById(R.id.sensor5);
         BT = (ImageView) findViewById(R.id.Bluetooth);
         systemPreferences = this.getSharedPreferences("com.jabo.jabo.roommapper_preferences",MODE_PRIVATE);
         //region Wakelock
 
         Log.d(TAG, "onCreate: Powermanager");
         final PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
-        this.mWakeLock = pm.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK, "wakescreen");
+        this.mWakeLock = pm.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK, "wakescreen");
 
         if(systemPreferences.getBoolean("screen_awake",true)) {
             this.mWakeLock.acquire();
@@ -535,7 +535,11 @@ public class ControlPage extends AppCompatActivity implements AdapterView.OnItem
     }
 
     public static void updateSensor(int color, int wich_sensor){
-        Sensors[wich_sensor-1].setBackgroundColor(color);
+        int result;
+        if (wich_sensor != 0){
+            result = wich_sensor -1;
+            Sensors[result].setBackgroundColor(color);
+        }
     }
 
     //region broadcastreceiver1
@@ -670,68 +674,102 @@ public class ControlPage extends AppCompatActivity implements AdapterView.OnItem
         }
     }
 
-    public static void receiveBTMessage(byte[] message){
+    private static int count = 0;
+    private static byte[] buffer = new byte[6];
+    public static void receiveBTMessage(byte message){
+        String TAG = "receiveBTMessage";
         int sensor = 0;
         boolean Ldrive;
         boolean Rdrive;
-        if((message[0]&0b10101111) == 0b10101111){
+        Log.d(TAG, "receiveBTMessage: message: "+message);
+        buffer[count]=message;
+        Log.d(TAG, "receiveBTMessage: number of message:"+count);
+        if(count == 2){
+            if(buffer[0] == -81) Log.d(TAG, "receiveBTMessage: startmessage");
+            else Log.d(TAG, "receiveBTMessage: no start message");
+            
+            count = 0;
+        }
+        count++;
+
+        /*for(int i = 0;i<length;i++) {
+            Log.d(TAG, "receiveBTMessage: message["+i+"]: " + message);
+        }*/
+        /*if((message[0]&0xAF) == 0xAF){
+            Log.d(TAG, "receiveBTMessage: init message received");
 
             if((message[1]&0b10000000) == 0b10000000){ // motor active
                 EngineOn(true);
+                Log.d(TAG, "receiveBTMessage: engine on");
             }
             else{
                 EngineOn(false);
+                Log.d(TAG, "receiveBTMessage: engine off");
             }
 
             if((message[1]&0b01000000)==0b01000000){
                 Ldrive = true;
+                Log.d(TAG, "receiveBTMessage: Ldrive on");
             }
             else{
                 Ldrive = false;
+                Log.d(TAG, "receiveBTMessage: Ldrive off");
             }
 
             if((message[1]&0b00100000)==0b00100000){
                 Rdrive = true;
+                Log.d(TAG, "receiveBTMessage: Rdrive on");
             }
             else{
                 Rdrive = false;
+                Log.d(TAG, "receiveBTMessage: Rdrive off");
             }
 
             switch (message[1]&0b00011111){// sensor number
-                case 0b00000000:
+                case 0:
                     sensor = 0;
+                    Log.d(TAG, "receiveBTMessage: sensor 0");
                     break;
-                case 0b00000001:
+                case 1:
                     sensor = 1;
+                    Log.d(TAG, "receiveBTMessage: sensor 1");
                     break;
-                case 0b00000010:
+                case 2:
                     sensor = 2;
+                    Log.d(TAG, "receiveBTMessage: sensor 2");
                     break;
-                case 0b00000100:
+                case 3:
                     sensor = 3;
+                    Log.d(TAG, "receiveBTMessage: sensor 3");
                     break;
-                case 0b00001000:
+                case 4:
                     sensor = 4;
+                    Log.d(TAG, "receiveBTMessage: sensor 4");
                     break;
-                case 0b00010000:
+                case 5:
                     sensor = 5;
+                    Log.d(TAG, "receiveBTMessage: sensor 5");
                     break;
             }
 
             switch (message[2]&0b00000111){ // sensor zone // 40 - 20 groen // oranje // rood //
-                case 0b00000001: //zone 1 (10 cm)
+                case 1: //zone 1 (10 cm)
                     updateSensor(R.color.RED,sensor);
+                    Log.d(TAG, "receiveBTMessage: sensor "+ sensor + " Red");
                     break;
-                case 0b00000010: //zone 2 (10 - 30 cm)
+                case 2: //zone 2 (10 - 30 cm)
                     updateSensor(R.color.ORANGE,sensor);
+                    Log.d(TAG, "receiveBTMessage: sensor "+ sensor + " Orange");
                     break;
-                case 0b00000011: //zone 3 (30 -50)
+                case 3: //zone 3 (30 -50)
                     updateSensor(R.color.YELLOW,sensor);
+                    Log.d(TAG, "receiveBTMessage: sensor "+ sensor + " Yellow");
                     break;
-                case 0b00000100: //zone 4 // 50<
+                case 4: //zone 4 // 50<
                     updateSensor(R.color.GREEN,sensor);
+                    Log.d(TAG, "receiveBTMessage: sensor "+ sensor + " Green");
                     break;
-                case 0b00000101: //zone 5 not used
+                case 5: //zone 5 not used
                     break;
             }
 
@@ -891,6 +929,10 @@ public class ControlPage extends AppCompatActivity implements AdapterView.OnItem
                 }
             }
         }
+        /*Log.d(TAG, "receiveBTMessage: empty received message");
+        for(int i = 0; i<message.length;i++){
+            message[i]=0;
+        }*/
     }
 
     public static void BTON(boolean state){

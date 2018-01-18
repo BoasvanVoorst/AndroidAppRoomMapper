@@ -8,12 +8,15 @@ import android.bluetooth.BluetoothSocket;
 import android.content.Context;
 import android.util.Log;
 
+import com.jabo.jabo.roommapper.ConnectTask;
 import com.jabo.jabo.roommapper.ControlPage;
+import com.jabo.jabo.roommapper.R;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.UUID;
 
 import static com.google.android.gms.internal.zzagz.runOnUiThread;
@@ -259,26 +262,51 @@ public class BluetoothConnectionService {
 
         public void run(){
             byte[] buffer = new byte[1024];  // buffer store for the stream
-
-            int bytes; // bytes returned from read()
+            byte[] newbuffer = new byte[1024];
+            int bytes = 0; // bytes returned from read()
+            int count = 0;
+            int sensor = 0;
 
             // Keep listening to the InputStream until an exception occurs
             while (true) {
                 // Read from the InputStream
                 try {
-                    bytes = mmInStream.read(buffer);
-                    String incomingMessage = new String(buffer, 0, bytes);
-                    Log.d(TAG, "InputStream: " + incomingMessage);
-                    final byte[] _buffer = buffer;
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            ControlPage.receiveBTMessage(_buffer);
+                    int bytesAvailable = mmInStream.available();
+                    if (bytesAvailable >= 1) {
+                        try {
+                            bytes = mmInStream.read(buffer, 0, buffer.length);
+                        } catch (IOException e) {
+                            Log.e(TAG, "write: Error reading Input Stream. " + e.getMessage());
+                            break;
                         }
-                    });
-                } catch (IOException e) {
-                    Log.e(TAG, "write: Error reading Input Stream. " + e.getMessage() );
-                    break;
+                    }
+                    for(int i = 0; i<bytes;i++){
+                        Log.d(TAG, "run: message["+i+"]: "+buffer[i]);
+                        newbuffer[count] = buffer[i];
+                        count++;
+                    }
+                    if(count > 2){
+                        if(newbuffer[0] == -81){
+                            Log.d(TAG, "run: startmessage");
+                            Log.d(TAG, "run: message 1: " + newbuffer[1]);
+                            Log.d(TAG, "run: message 2: " + newbuffer[2]);
+                            for(int c = 0;c<newbuffer.length-3;c++){
+                                newbuffer[c] = newbuffer[c+3];
+                            }
+                            count = count - 3;
+                        }
+                        else{
+                            Log.e(TAG, "run: start message missed");
+                            for(int c = 0;c<newbuffer.length-1;c++){
+                                newbuffer[c] = newbuffer[c+1];
+                            }
+                            count = count - 1;
+                        }
+                    }
+                    bytes = 0;
+                }
+                catch (IOException e){
+
                 }
             }
         }

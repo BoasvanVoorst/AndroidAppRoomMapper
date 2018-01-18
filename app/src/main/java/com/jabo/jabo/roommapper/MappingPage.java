@@ -15,7 +15,6 @@ public class MappingPage extends AppCompatActivity {
     static DrawView drawView;
     static int currentCoords = 0;
     static int[][] coords = new int[1000][4];
-    private final float TOUCH_SCALE_FACTOR = 180.0f / 320;
     private static float offsetx;
     private static float offsety;
     @Override
