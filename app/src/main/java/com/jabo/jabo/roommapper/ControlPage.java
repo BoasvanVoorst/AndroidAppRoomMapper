@@ -1,6 +1,5 @@
 package com.jabo.jabo.roommapper;
 
-import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
@@ -8,16 +7,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.media.Image;
-import android.os.Build;
-import android.support.v4.util.CircularArray;
-import android.support.v4.util.CircularIntArray;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -25,41 +19,30 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 import android.os.PowerManager;
-
 import com.jabo.jabo.BT.BluetoothConnectionService;
-
 import java.io.IOException;
-import java.net.ConnectException;
 import java.util.ArrayList;
 import java.util.Set;
 import java.util.UUID;
 
-public class ControlPage extends AppCompatActivity implements AdapterView.OnItemClickListener{
+public class ControlPage extends AppCompatActivity/* implements AdapterView.OnItemClickListener*/{
     private final String TAG = "ControlPage";
-
-    private static int message_distance = 5;
-
-    private final static int X = 0;
-    private final static int Y = 1;
-    private static int[][] coords = new int[2][];
-    private static int coordnumber = 0;
 
     protected PowerManager.WakeLock mWakeLock;
 
+    private static Thread sendThread;
     private static Context context;
     private static Toast toast;
-    private static byte[] direction = new byte[1];
+    public static byte[] direction = new byte[1];
     private static boolean run = false;
+    private static boolean sending = true;
     private SharedPreferences systemPreferences;
-
-    private byte[] receivedMessage = new byte[10];
 
     static ImageButton ForwardButton;
     static ImageButton BackwardButton;
     static ImageButton LeftButton;
     static ImageButton RightButton;
     static ImageView BT;
-    private static int degree = 0;
     static ImageView engine;
     static ImageView sensor1;
     static ImageView sensor2;
@@ -69,28 +52,40 @@ public class ControlPage extends AppCompatActivity implements AdapterView.OnItem
     static ImageView Sensors[] = new ImageView[5];
 
     //region bt init
-    BluetoothConnectionService mBluetoothConnection;
-
-    BluetoothAdapter mBluetoothAdapter;
-
+    private BluetoothConnectionService mBluetoothConnection;
+    private BluetoothAdapter mBluetoothAdapter;
     private static final UUID MY_UUID_INSECURE = UUID.fromString("00001101-0000-1000-8000-00805f9b34fb");
-
-    BluetoothDevice mBTDevice;
-
+    private BluetoothDevice mBTDevice;
     public ArrayList<BluetoothDevice> mBTDevices = new ArrayList<>();
-
     //endregion
 
-    static boolean sending = true;
-
-    Thread sendThread;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_control_page);
-        final Activity var = this;
+        direction[0] = 0;
+        sendThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                Log.d(TAG, "run: sendThread started");
+                while(sending) {
+                    try {
+                        Log.d(TAG, "run: direction send: "+direction[0]);
+                        mBluetoothConnection.write(direction);
+                        try {
+                            sendThread.sleep(25);
+                        }
+                        catch(InterruptedException e){
+                        }
+                    }
+                    catch (IOException e){
+                    }
+                }
+            }
+        });
+
         Context context = getApplicationContext();
-        this.context =context;
+        this.context = context;
         engine = (ImageView) findViewById(R.id.engineImage);
         Sensors[0] = sensor1 = (ImageView)findViewById(R.id.sensor1);
         Sensors[1] = sensor2 = (ImageView)findViewById(R.id.sensor2);
@@ -135,35 +130,9 @@ public class ControlPage extends AppCompatActivity implements AdapterView.OnItem
                         Log.d(TAG, "onTouch: forward");
                         direction[0] = 3;
                     }
-                    sending = true;
-                    sendThread = new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Log.d(TAG, "run: sendThread started");
-                            while(sending) {
-                                try {
-                                    mBluetoothConnection.write(direction);
-                                    try {
-                                        sendThread.sleep(50);
-                                    }
-                                    catch(InterruptedException e){
-
-                                    }
-                                    //Log.d(TAG, "run: sending" + direction);
-                                }
-                                catch (IOException e){
-                                    //Log.e(TAG, "run: sendThread: ", e );
-                                }
-                            }
-                        }
-                    });
-                    sendThread.start();
-                    //mBluetoothConnection.write(direction);
                 }
                 else if(event.getAction() == MotionEvent.ACTION_UP){
                     BackwardButton.setEnabled(true);
-                    sending = false;
-                    sendThread=null;
                     if(RightButton.isPressed()) {
                         Log.d(TAG, "onTouch: Right");
                         direction[0] = 5;
@@ -175,14 +144,6 @@ public class ControlPage extends AppCompatActivity implements AdapterView.OnItem
                     else{
                         Log.d(TAG, "onTouch: halt");
                         direction[0] = 0;
-                    }
-                    try {
-                        mBluetoothConnection.write(direction);
-                    }catch (ConnectException e){
-                        popup("turn on device please");
-                    } catch (Exception e) {
-                        popup("Cant send to device");
-                        connectDevice();
                     }
                 }
                 return false;
@@ -209,34 +170,9 @@ public class ControlPage extends AppCompatActivity implements AdapterView.OnItem
                         Log.d(TAG, "onTouch: backward");
                         direction[0] = 7;
                     }
-                    sending = true;
-                    sendThread = new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Log.d(TAG, "run: sendThread started");
-                            while(sending) {
-                                try {
-                                    mBluetoothConnection.write(direction);
-                                    try {
-                                        sendThread.sleep(50);
-                                    }
-                                    catch(InterruptedException e){
-
-                                    }
-                                    //Log.d(TAG, "run: sending" + direction);
-                                }
-                                catch (IOException e){
-                                    //Log.e(TAG, "run: sendThread: ", e );
-                                }
-                            }
-                        }
-                    });
-                    sendThread.start();
                 }
                 else if(event.getAction() == MotionEvent.ACTION_UP){
                     ForwardButton.setEnabled(true);
-                    sending = false;
-                    sendThread=null;
                     if(RightButton.isPressed()) {
                         Log.d(TAG, "onTouch: right");
                         direction[0] = 5;
@@ -248,14 +184,6 @@ public class ControlPage extends AppCompatActivity implements AdapterView.OnItem
                     else{
                         Log.d(TAG, "onTouch: halt");
                         direction[0] = 0;
-                    }
-                    try {
-                        mBluetoothConnection.write(direction);
-                    } catch (ConnectException e){
-                        popup("turn on device please");
-                    } catch (Exception e) {
-                        popup("Cant send to device");
-                        connectDevice();
                     }
                 }
                 return false;
@@ -281,34 +209,9 @@ public class ControlPage extends AppCompatActivity implements AdapterView.OnItem
                         Log.d(TAG, "onTouch: right");
                         direction[0] = 5;
                     }
-                    sending = true;
-                    sendThread = new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Log.d(TAG, "run: sendThread started");
-                            while(sending) {
-                                try {
-                                    mBluetoothConnection.write(direction);
-                                    try {
-                                        sendThread.sleep(50);
-                                    }
-                                    catch(InterruptedException e){
-
-                                    }
-                                    //Log.d(TAG, "run: sending" + direction);
-                                }
-                                catch (IOException e){
-                                    //Log.e(TAG, "run: sendThread: ", e );
-                                }
-                            }
-                        }
-                    });
-                    sendThread.start();
                 }
                 else if(event.getAction() == MotionEvent.ACTION_UP){
                     LeftButton.setEnabled(true);
-                    sending = false;
-                    sendThread = null;
                     if(ForwardButton.isPressed()){
                         direction[0] = 3;
                         Log.d(TAG, "onTouch: forward");
@@ -320,14 +223,6 @@ public class ControlPage extends AppCompatActivity implements AdapterView.OnItem
                     else{
                         Log.d(TAG, "onTouch: halt");
                         direction[0] = 0;
-                    }
-                    try {
-                        mBluetoothConnection.write(direction);
-                    } catch (ConnectException e){
-                        popup("turn on device please");
-                    } catch (Exception e) {
-                        popup("Cant send to device");
-                        connectDevice();
                     }
                 }
                 return false;
@@ -353,34 +248,9 @@ public class ControlPage extends AppCompatActivity implements AdapterView.OnItem
                         Log.d(TAG, "onTouch: left");
                         direction[0] = 1;
                     }
-                    sending = true;
-                    sendThread = new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Log.d(TAG, "run: sendThread started");
-                            while(sending) {
-                                try {
-                                    mBluetoothConnection.write(direction);
-                                    try {
-                                        sendThread.sleep(50);
-                                    }
-                                    catch(InterruptedException e){
-
-                                    }
-                                    //Log.d(TAG, "run: sending" + direction);
-                                }
-                                catch (IOException e){
-                                    //Log.e(TAG, "run: sendThread: ", e );
-                                }
-                            }
-                        }
-                    });
-                    sendThread.start();
                 }
                 else if(event.getAction() == MotionEvent.ACTION_UP){
                     RightButton.setEnabled(true);
-                    sending = false;
-                    sendThread = null;
                     if(ForwardButton.isPressed()){
                         direction[0] = 3;
                         Log.d(TAG, "onTouch: forward");
@@ -393,14 +263,6 @@ public class ControlPage extends AppCompatActivity implements AdapterView.OnItem
                         Log.d(TAG, "onTouch: halt");
                         direction[0] = 0;
                     }
-                    try {
-                        mBluetoothConnection.write(direction);
-                    } catch (ConnectException e){
-                        popup("turn on device please");
-                    } catch (Exception e) {
-                        popup("Cant send to device");
-                        connectDevice();
-                    }
                 }
                 return false;
             }
@@ -411,7 +273,7 @@ public class ControlPage extends AppCompatActivity implements AdapterView.OnItem
 
         //Broadcasts when bond state changes (ie:pairing)
         IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
-        registerReceiver(mBroadcastReceiver4, filter);
+        registerReceiver(mBroadcastReceiver2, filter);
 
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
@@ -420,7 +282,7 @@ public class ControlPage extends AppCompatActivity implements AdapterView.OnItem
         connectDevice();
     }
 
-    public void connectDevice(){
+    public void connectDevice(){ // checks for bluetooth device
         if(mBluetoothConnection != null) mBluetoothConnection.cancel();
         String btdeviceName = systemPreferences.getString("Device_Name","JaBo");
         Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
@@ -453,15 +315,14 @@ public class ControlPage extends AppCompatActivity implements AdapterView.OnItem
         start();
     }
 
-    private void start(){
-        byte[] message = new byte[1];
-        message[0]=(byte)0b10000000;
+    private void start(){           // runs when start button is pressed
         Button samplesButtonadd = (Button) findViewById(R.id.addSample);
         Button samplesButtonmin = (Button) findViewById(R.id.minsample);
         TextView RoomName = (TextView) findViewById(R.id.RoomName);
         String input = RoomName.getText().toString();
         boolean equals = false;
-        if (input.equalsIgnoreCase("Room Name")){
+
+        if (input.equalsIgnoreCase("Room Name")){ // checks if roomname is not empty and does not have the standard name
             equals = true;
             popup("please enter a new room name");
         }
@@ -470,19 +331,12 @@ public class ControlPage extends AppCompatActivity implements AdapterView.OnItem
             popup("please enter a room name");
         }
 
-        if (run == false && equals == false){
+        if (!run && !equals){   // if measuring is not started and if it has a correct file name than start measuring and log this to the server.
             run = true;
-            //new ConnectTask().execute("");
             popup("started");
             samplesButtonadd.setEnabled(false);
             samplesButtonmin.setEnabled(false);
             RoomName.setEnabled(false);
-            try {
-                mBluetoothConnection.write(message);
-            }
-            catch (Exception e){
-                Log.e("ControlPage","Write",e);
-            }
             if (ConnectTask.mTcpClient != null) {
                 ConnectTask.mTcpClient.sendMessage("Start<LOG>");
             }
@@ -490,17 +344,10 @@ public class ControlPage extends AppCompatActivity implements AdapterView.OnItem
                 ConnectTask.mTcpClient.sendMessage(input+"<NAME>");
             }
         }
-        else if (equals == false)
+        else if (!equals) // stops measuring
         {
             popup("stopped");
             run = false;
-            try {
-                mBluetoothConnection.write(message);
-            } catch (ConnectException e){
-                popup("turn on device please");
-            } catch (Exception e) {
-                popup("Cant send to device");
-            }
             samplesButtonadd.setEnabled(true);
             samplesButtonmin.setEnabled(true);
             RoomName.setEnabled(true);
@@ -512,7 +359,7 @@ public class ControlPage extends AppCompatActivity implements AdapterView.OnItem
         }
     }
 
-    public static void popup(String message){
+    public static void popup(String message){       // simple popup message
         int duration = Toast.LENGTH_SHORT;
         if(toast != null) {
             toast.cancel();
@@ -525,7 +372,7 @@ public class ControlPage extends AppCompatActivity implements AdapterView.OnItem
         }
     }
 
-    public static void EngineOn(boolean state){
+    public static void EngineOn(boolean state){     //updates engine image from thread
         if(state){
             engine.setImageResource(android.R.drawable.presence_online);
         }
@@ -534,11 +381,13 @@ public class ControlPage extends AppCompatActivity implements AdapterView.OnItem
         }
     }
 
-    public static void updateSensor(int color, int wich_sensor){
+    public static void updateSensor(int color, int wich_sensor){// updates sensor images from thread
         int result;
+        String TAG = "updateSensor";
         if (wich_sensor != 0){
             result = wich_sensor -1;
-            Sensors[result].setBackgroundColor(color);
+            Log.d(TAG, "updateSensor: sensor: "+result);
+            Sensors[result].setColorFilter(color);
         }
     }
 
@@ -569,11 +418,11 @@ public class ControlPage extends AppCompatActivity implements AdapterView.OnItem
     };
     //endregion
 
-    //region Broadcastreceiver4
+    //region Broadcastreceiver2
     /**
      * Broadcast Receiver that detects bond state changes (Pairing status changes)
      */
-    private final BroadcastReceiver mBroadcastReceiver4 = new BroadcastReceiver() {
+    private final BroadcastReceiver mBroadcastReceiver2 = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             final String action = intent.getAction();
@@ -584,7 +433,7 @@ public class ControlPage extends AppCompatActivity implements AdapterView.OnItem
                 //case1: bonded already
                 if (mDevice.getBondState() == BluetoothDevice.BOND_BONDED){
                     Log.d(TAG, "BroadcastReceiver: BOND_BONDED.");
-                    //inside BroadcastReceiver4
+                    //inside BroadcastReceiver2
                     mBTDevice = mDevice;
                 }
                 //case2: creating a bone
@@ -600,26 +449,23 @@ public class ControlPage extends AppCompatActivity implements AdapterView.OnItem
     };
     //endregion
 
-
     //create method for starting connection
     //***remember the conncetion will fail and app will crash if you haven't paired first
     public void startConnection(){
         startBTConnection(mBTDevice,MY_UUID_INSECURE);
     }
 
-    public void startBTConnection(BluetoothDevice device, UUID uuid){
+    public void startBTConnection(BluetoothDevice device, UUID uuid){           // starts Bluetooth connection
         Log.d(TAG, "startBTConnection: Initializing RFCOM Bluetooth Connection.");
         mBluetoothConnection = new BluetoothConnectionService(ControlPage.this);
         mBluetoothConnection.startClient(device,uuid);
     }
 
-
-
-    public void enableDisableBT(){
+    public void enableDisableBT(){      // enables Bluetooth
         if(mBluetoothAdapter == null){
             Log.d(TAG, "enableDisableBT: Does not have BT capabilities.");
         }
-        if(!mBluetoothAdapter.isEnabled()){
+        if(!mBluetoothAdapter.isEnabled()){     // if bluetooth not is enabled request to enable Bluetooth
             Log.d(TAG, "enableDisableBT: enabling BT.");
             Intent enableBTIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivity(enableBTIntent);
@@ -634,32 +480,13 @@ public class ControlPage extends AppCompatActivity implements AdapterView.OnItem
     }
 
     @Override
-    public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-        //first cancel discovery because its very memory intensive.
-        mBluetoothAdapter.cancelDiscovery();
-
-        Log.d(TAG, "onItemClick: You Clicked on a device.");
-        String deviceName = mBTDevices.get(i).getName();
-        String deviceAddress = mBTDevices.get(i).getAddress();
-
-        Log.d(TAG, "onItemClick: deviceName = " + deviceName);
-        Log.d(TAG, "onItemClick: deviceAddress = " + deviceAddress);
-
-        if(Build.VERSION.SDK_INT > Build.VERSION_CODES.JELLY_BEAN_MR2){
-            Log.d(TAG, "Trying to pair with " + deviceName);
-            mBTDevices.get(i).createBond();
-
-            mBTDevice = mBTDevices.get(i);
-            mBluetoothConnection = new BluetoothConnectionService(ControlPage.this);
-        }
-    }
-
-    @Override
-    protected void onDestroy(){
-        if(systemPreferences.getBoolean("screen_awake",true)) super.onDestroy();
+    protected void onDestroy(){     // if application gets closed destroys al threads and unregisters broadcast receivers
         Log.d(TAG, "onDestroy: called.");
-        this.mWakeLock.release();
+        super.onDestroy();
+        if(systemPreferences.getBoolean("screen_awake",true)) this.mWakeLock.release();
         mBluetoothConnection.cancel();
+        sending = false;
+        sendThread = null;
         try {
             unregisterReceiver(mBroadcastReceiver1);
         }
@@ -667,11 +494,18 @@ public class ControlPage extends AppCompatActivity implements AdapterView.OnItem
             Log.e(TAG, "onDestroy: BroadcastReceiver1",e );
         }
         try {
-            unregisterReceiver(mBroadcastReceiver4);
+            unregisterReceiver(mBroadcastReceiver2);
         }
         catch(IllegalArgumentException e){
-            Log.e(TAG, "onDestroy: BroadcastReceiver4",e );
+            Log.e(TAG, "onDestroy: BroadcastReceiver2",e );
         }
+    }
+
+    @Override
+    public void onPause(){
+        super.onPause();
+        mBluetoothConnection.cancel();
+        sendThread = null;
     }
 
     private static int count = 0;
@@ -681,20 +515,7 @@ public class ControlPage extends AppCompatActivity implements AdapterView.OnItem
         int sensor = 0;
         boolean Ldrive;
         boolean Rdrive;
-        Log.d(TAG, "receiveBTMessage: message: "+message);
-        buffer[count]=message;
-        Log.d(TAG, "receiveBTMessage: number of message:"+count);
-        if(count == 2){
-            if(buffer[0] == -81) Log.d(TAG, "receiveBTMessage: startmessage");
-            else Log.d(TAG, "receiveBTMessage: no start message");
-            
-            count = 0;
-        }
-        count++;
 
-        /*for(int i = 0;i<length;i++) {
-            Log.d(TAG, "receiveBTMessage: message["+i+"]: " + message);
-        }*/
         /*if((message[0]&0xAF) == 0xAF){
             Log.d(TAG, "receiveBTMessage: init message received");
 
@@ -935,8 +756,11 @@ public class ControlPage extends AppCompatActivity implements AdapterView.OnItem
         }*/
     }
 
-    public static void BTON(boolean state){
-        if(state) BT.setImageResource(android.R.drawable.button_onoff_indicator_on);
+    public static void BTON(boolean state){ // updates the BTConnected image and if bluetooth connected it starts the send thread
+        if(state) {
+            BT.setImageResource(android.R.drawable.button_onoff_indicator_on);
+            sendThread.start();
+        }
         else BT.setImageResource(android.R.drawable.button_onoff_indicator_off);
     }
 }

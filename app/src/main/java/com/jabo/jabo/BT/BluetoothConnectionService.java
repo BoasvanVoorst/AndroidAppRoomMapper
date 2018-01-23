@@ -6,6 +6,8 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothServerSocket;
 import android.bluetooth.BluetoothSocket;
 import android.content.Context;
+import android.graphics.Color;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.jabo.jabo.roommapper.ConnectTask;
@@ -16,10 +18,18 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
+import java.sql.Time;
 import java.util.ArrayList;
+import java.util.ResourceBundle;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import static com.google.android.gms.internal.zzagz.runOnUiThread;
+import static com.jabo.jabo.roommapper.ControlPage.updateSensor;
+import static java.lang.System.currentTimeMillis;
 
 /**
  * Created by User on 12/21/2016.
@@ -233,6 +243,7 @@ public class BluetoothConnectionService {
         private final BluetoothSocket mmSocket;
         private final InputStream mmInStream;
         private final OutputStream mmOutStream;
+        private boolean mRun = true;
 
         public ConnectedThread(BluetoothSocket socket) {
             Log.d(TAG, "ConnectedThread: Starting.");
@@ -266,48 +277,242 @@ public class BluetoothConnectionService {
             int bytes = 0; // bytes returned from read()
             int count = 0;
             int sensor = 0;
+            int cDegree = 0;
+            int X = 1;
+            int Y = 0;
+            int cX = 0;
+            int cY = 0;
+            int stapgrote = 1; // in cm
+            Lock l = new ReentrantLock();
 
             // Keep listening to the InputStream until an exception occurs
-            while (true) {
-                // Read from the InputStream
-                try {
-                    int bytesAvailable = mmInStream.available();
-                    if (bytesAvailable >= 1) {
-                        try {
-                            bytes = mmInStream.read(buffer, 0, buffer.length);
-                        } catch (IOException e) {
-                            Log.e(TAG, "write: Error reading Input Stream. " + e.getMessage());
-                            break;
-                        }
-                    }
-                    for(int i = 0; i<bytes;i++){
-                        Log.d(TAG, "run: message["+i+"]: "+buffer[i]);
-                        newbuffer[count] = buffer[i];
-                        count++;
-                    }
-                    if(count > 2){
-                        if(newbuffer[0] == -81){
-                            Log.d(TAG, "run: startmessage");
-                            Log.d(TAG, "run: message 1: " + newbuffer[1]);
-                            Log.d(TAG, "run: message 2: " + newbuffer[2]);
-                            for(int c = 0;c<newbuffer.length-3;c++){
-                                newbuffer[c] = newbuffer[c+3];
+            while (mRun) {
+                l.lock();
+                try{
+                    // Read from the InputStream
+                    try {
+                        int bytesAvailable = mmInStream.available();
+                        if (bytesAvailable >= 1) {
+                            try {
+                                bytes = mmInStream.read(buffer, 0, buffer.length);
+                            } catch (IOException e) {
+                                Log.e(TAG, "write: Error reading Input Stream. " + e.getMessage());
+                                break;
                             }
-                            count = count - 3;
                         }
-                        else{
-                            Log.e(TAG, "run: start message missed");
-                            for(int c = 0;c<newbuffer.length-1;c++){
-                                newbuffer[c] = newbuffer[c+1];
-                            }
-                            count = count - 1;
+                        for (int i = 0; i < bytes; i++) {
+                            newbuffer[count] = buffer[i];
+                            count++;
                         }
-                    }
-                    bytes = 0;
-                }
-                catch (IOException e){
+                        if (count > 2) {
+                            if (newbuffer[0] == -81) {//startmessage
+                                final int _sensor = sensor;
 
+                                //region engine
+                                if ((newbuffer[1] & 0b10000000) == 0b10000000) { // motor active
+                                    runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            ControlPage.EngineOn(true);
+                                        }
+                                    });
+                                    //Log.d(TAG, "receiveBTMessage: engine on");
+                                } else {
+                                    runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            ControlPage.EngineOn(false);
+                                        }
+                                    });
+                                    //Log.d(TAG, "receiveBTMessage: engine off");
+                                }
+                                //endregion
+
+                                //region sensors
+                                switch (newbuffer[1] & 0b00011111) {// sensor number
+                                    case 0:
+                                        sensor = 0;
+                                        Log.d(TAG, "receiveBTMessage: sensor 0");
+                                        break;
+                                    case 1:
+                                        sensor = 1;
+                                        Log.d(TAG, "receiveBTMessage: sensor 1");
+                                        break;
+                                    case 2:
+                                        sensor = 2;
+                                        Log.d(TAG, "receiveBTMessage: sensor 2");
+                                        break;
+                                    case 3:
+                                        sensor = 3;
+                                        Log.d(TAG, "receiveBTMessage: sensor 3");
+                                        break;
+                                    case 4:
+                                        sensor = 4;
+                                        Log.d(TAG, "receiveBTMessage: sensor 4");
+                                        break;
+                                    case 5:
+                                        sensor = 5;
+                                        Log.d(TAG, "receiveBTMessage: sensor 5");
+                                        break;
+                                }
+
+                                //endregion
+
+                                //region afbeelding update
+                                if (sensor != 0) {
+                                    switch (newbuffer[2] & 0b00000111) { // sensor zone // 40 - 20 groen // oranje // rood //
+                                        case 1: //zone 1 (10 cm)
+                                            runOnUiThread(new Runnable() {
+                                                @Override
+                                                public void run() {
+                                                    updateSensor(Color.RED, _sensor);
+                                                }
+                                            });
+
+                                            Log.d(TAG, "receiveBTMessage: sensor " + sensor + " Red");
+                                            break;
+                                        case 2: //zone 2 (10 - 30 cm)
+                                            runOnUiThread(new Runnable() {
+                                                @Override
+                                                public void run() {
+                                                    updateSensor(Color.rgb(255, 153, 0), _sensor);
+                                                }
+                                            });
+                                            Log.d(TAG, "receiveBTMessage: sensor " + sensor + " Orange");
+                                            break;
+                                        case 3: //zone 3 (30 -50)
+                                            runOnUiThread(new Runnable() {
+                                                @Override
+                                                public void run() {
+                                                    updateSensor(Color.rgb(255, 255, 0), _sensor);
+                                                }
+                                            });
+                                            Log.d(TAG, "receiveBTMessage: sensor " + sensor + " Yellow");
+                                            break;
+                                        case 4: //zone 4 // 50<
+                                            runOnUiThread(new Runnable() {
+                                                @Override
+                                                public void run() {
+                                                    updateSensor(Color.rgb(0, 255, 0), _sensor);
+                                                }
+                                            });
+                                            Log.d(TAG, "receiveBTMessage: sensor " + sensor + " Green");
+                                            break;
+                                        case 5: //zone 5 not used
+                                            break;
+                                    }
+                                }
+                                //endregion
+
+                                //region send to server
+                                Boolean EngineL = false, EngineR = false;
+
+                                if ((newbuffer[1] & 0b01000000) == 0b01000000) {
+                                    EngineL = true;
+                                }
+                                if ((newbuffer[1] & 0b00100000) == 0b00100000) {
+                                    EngineR = true;
+                                }
+
+                                if (EngineL && EngineR) {// if both engines are on
+                                    //forward or backward
+                                    switch (cDegree){
+                                        case 0:
+                                            if(ControlPage.direction[0] == 3 ){ // Vooruit
+                                                // add to Y
+                                            } else if (ControlPage.direction[0] == 7){ // Achteruit
+                                                // min from Y
+                                            }
+                                            break;
+                                        case 45:
+                                            if(ControlPage.direction[0] == 3 ){ // Vooruit
+                                                // add to X and Y
+                                            } else if (ControlPage.direction[0] == 7){ // Achteruit
+                                                // min from X and Y
+                                            }
+                                            break;
+                                        case 90:
+                                            if(ControlPage.direction[0] == 3 ){ // Vooruit
+                                                // add to X
+                                            } else if (ControlPage.direction[0] == 7){ // Achteruit
+                                                // min from X
+                                            }
+                                            break;
+                                        case 135:
+                                            if(ControlPage.direction[0] == 3 ){ // Vooruit
+                                                // add X and min from Y
+                                            } else if (ControlPage.direction[0] == 7){ // Achteruit
+                                                // min from X and add to Y
+                                            }
+                                            break;
+                                        case 180:
+                                            if(ControlPage.direction[0] == 3 ){ // Vooruit
+                                                // min from Y
+                                            } else if (ControlPage.direction[0] == 7){ // Achteruit
+                                                // add to Y
+                                            }
+                                            break;
+                                        case 225:
+                                            if(ControlPage.direction[0] == 3 ){ // Vooruit
+                                                // min from Y and min from X
+                                            } else if (ControlPage.direction[0] == 7){ // Achteruit
+                                                // add to Y and add to X
+                                            }
+                                            break;
+                                        case 270:
+                                            if(ControlPage.direction[0] == 3 ){ // Vooruit
+                                                // min from X
+                                            } else if (ControlPage.direction[0] == 7){ // Achteruit
+                                                // add to X
+                                            }
+                                            break;
+                                        case 315:
+                                            if(ControlPage.direction[0] == 3 ){ // Vooruit
+                                                // min from X and add to Y
+                                            } else if (ControlPage.direction[0] == 7){ // Achteruit
+                                                // add to X and min from Y
+                                            }
+                                            break;
+                                    }
+
+                                } else if (EngineL) {// if engine L is on
+                                    //rotation of -45 degrees
+                                    cDegree += -45;
+                                    if(cDegree == -45)cDegree = 315;
+                                    Log.d(TAG, "run: cDegree = "+cDegree);
+
+                                } else if (EngineR) {// if engine R is on
+                                    //rotation of 45 degrees
+                                    cDegree += 45;
+                                    if(cDegree == 360)cDegree = 0;
+                                    Log.d(TAG, "run: cDegree = "+cDegree);
+                                } else {
+
+                                }
+                                //endregion
+
+                                // end loop
+                                for (int c = 0; c < newbuffer.length - 3; c++) {
+                                    newbuffer[c] = newbuffer[c + 3];
+                                }
+                                count = count - 3;
+                            } else {
+                                Log.e(TAG, "run: start message missed");
+                                for (int c = 0; c < newbuffer.length - 1; c++) {
+                                    newbuffer[c] = newbuffer[c + 1];
+                                }
+                                count = count - 1;
+                            }
+                        }
+                        bytes = 0;
+                    } catch (IOException e) {
+
+                    }
                 }
+                finally {
+                        l.unlock();
+                        //Log.d(TAG, "run: unlocked");
+                    }
             }
         }
 
@@ -318,6 +523,7 @@ public class BluetoothConnectionService {
 
         /* Call this from the main activity to shutdown the connection */
         public void cancel() {
+            mRun = false;
             try {
                 mmSocket.close();
             } catch (IOException e) { }
@@ -341,15 +547,14 @@ public class BluetoothConnectionService {
     public void write(byte[] out) throws IOException{
         // Create temporary object
         ConnectedThread r;
-
-        // Synchronize a copy of the ConnectedThread
-        Log.d(TAG, "write: Write Called.");
         //perform the write
-        mConnectedThread.write(out);
+        if(mConnectedThread != null)
+            mConnectedThread.write(out);
     }
 
     public synchronized void cancel(){
-        if(mConnectedThread != null)
+        Log.d(TAG, "cancel: connectedthread");
+        //if(mConnectedThread != null)
             mConnectedThread.cancel();
         if(mConnectThread != null)
             mConnectThread.cancel();
