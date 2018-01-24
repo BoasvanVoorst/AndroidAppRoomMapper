@@ -1,9 +1,6 @@
 package com.jabo.jabo.roommapper;
 
-import android.content.Context;
 import android.content.Intent;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -56,6 +53,7 @@ public class Menu extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        finish();
     }
 
     @Override

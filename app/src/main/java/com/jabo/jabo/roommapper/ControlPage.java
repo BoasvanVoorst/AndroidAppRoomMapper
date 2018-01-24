@@ -34,7 +34,7 @@ public class ControlPage extends AppCompatActivity/* implements AdapterView.OnIt
     private static Context context;
     private static Toast toast;
     public static byte[] direction = new byte[1];
-    private static boolean run = false;
+    public static boolean run = false;
     private static boolean sending = true;
     private SharedPreferences systemPreferences;
 
@@ -60,13 +60,12 @@ public class ControlPage extends AppCompatActivity/* implements AdapterView.OnIt
     //endregion
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_control_page);
-        direction[0] = 0;
+    protected void onResume(){
+        super.onResume();
         sendThread = new Thread(new Runnable() {
             @Override
             public void run() {
+                sending = true;
                 Log.d(TAG, "run: sendThread started");
                 while(sending) {
                     try {
@@ -81,6 +80,35 @@ public class ControlPage extends AppCompatActivity/* implements AdapterView.OnIt
                     catch (IOException e){
                     }
                 }
+                Log.d(TAG, "run: sendThread stopped");
+            }
+        });
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_control_page);
+        direction[0] = 0;
+        sendThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                sending = true;
+                Log.d(TAG, "run: sendThread started");
+                while(sending) {
+                    try {
+                        Log.d(TAG, "run: direction send: "+direction[0]);
+                        mBluetoothConnection.write(direction);
+                        try {
+                            sendThread.sleep(25);
+                        }
+                        catch(InterruptedException e){
+                        }
+                    }
+                    catch (IOException e){
+                    }
+                }
+                Log.d(TAG, "run: sendThread stopped");
             }
         });
 
@@ -316,8 +344,6 @@ public class ControlPage extends AppCompatActivity/* implements AdapterView.OnIt
     }
 
     private void start(){           // runs when start button is pressed
-        Button samplesButtonadd = (Button) findViewById(R.id.addSample);
-        Button samplesButtonmin = (Button) findViewById(R.id.minsample);
         TextView RoomName = (TextView) findViewById(R.id.RoomName);
         String input = RoomName.getText().toString();
         boolean equals = false;
@@ -334,22 +360,24 @@ public class ControlPage extends AppCompatActivity/* implements AdapterView.OnIt
         if (!run && !equals){   // if measuring is not started and if it has a correct file name than start measuring and log this to the server.
             run = true;
             popup("started");
-            samplesButtonadd.setEnabled(false);
-            samplesButtonmin.setEnabled(false);
             RoomName.setEnabled(false);
-            if (ConnectTask.mTcpClient != null) {
-                ConnectTask.mTcpClient.sendMessage("Start<LOG>");
-            }
-            if (ConnectTask.mTcpClient != null) {
-                ConnectTask.mTcpClient.sendMessage(input+"<NAME>");
-            }
+            final String _input = input;
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    if (ConnectTask.mTcpClient != null) {
+                        ConnectTask.mTcpClient.sendMessage("Start<LOG>");
+                    }
+                    if (ConnectTask.mTcpClient != null) {
+                        ConnectTask.mTcpClient.sendMessage(_input+"<NAME>");
+                    }
+                }
+            }).start();
         }
         else if (!equals) // stops measuring
         {
             popup("stopped");
             run = false;
-            samplesButtonadd.setEnabled(true);
-            samplesButtonmin.setEnabled(true);
             RoomName.setEnabled(true);
         }
         else{
@@ -499,6 +527,7 @@ public class ControlPage extends AppCompatActivity/* implements AdapterView.OnIt
         catch(IllegalArgumentException e){
             Log.e(TAG, "onDestroy: BroadcastReceiver2",e );
         }
+        finish();
     }
 
     @Override
@@ -506,254 +535,6 @@ public class ControlPage extends AppCompatActivity/* implements AdapterView.OnIt
         super.onPause();
         mBluetoothConnection.cancel();
         sendThread = null;
-    }
-
-    private static int count = 0;
-    private static byte[] buffer = new byte[6];
-    public static void receiveBTMessage(byte message){
-        String TAG = "receiveBTMessage";
-        int sensor = 0;
-        boolean Ldrive;
-        boolean Rdrive;
-
-        /*if((message[0]&0xAF) == 0xAF){
-            Log.d(TAG, "receiveBTMessage: init message received");
-
-            if((message[1]&0b10000000) == 0b10000000){ // motor active
-                EngineOn(true);
-                Log.d(TAG, "receiveBTMessage: engine on");
-            }
-            else{
-                EngineOn(false);
-                Log.d(TAG, "receiveBTMessage: engine off");
-            }
-
-            if((message[1]&0b01000000)==0b01000000){
-                Ldrive = true;
-                Log.d(TAG, "receiveBTMessage: Ldrive on");
-            }
-            else{
-                Ldrive = false;
-                Log.d(TAG, "receiveBTMessage: Ldrive off");
-            }
-
-            if((message[1]&0b00100000)==0b00100000){
-                Rdrive = true;
-                Log.d(TAG, "receiveBTMessage: Rdrive on");
-            }
-            else{
-                Rdrive = false;
-                Log.d(TAG, "receiveBTMessage: Rdrive off");
-            }
-
-            switch (message[1]&0b00011111){// sensor number
-                case 0:
-                    sensor = 0;
-                    Log.d(TAG, "receiveBTMessage: sensor 0");
-                    break;
-                case 1:
-                    sensor = 1;
-                    Log.d(TAG, "receiveBTMessage: sensor 1");
-                    break;
-                case 2:
-                    sensor = 2;
-                    Log.d(TAG, "receiveBTMessage: sensor 2");
-                    break;
-                case 3:
-                    sensor = 3;
-                    Log.d(TAG, "receiveBTMessage: sensor 3");
-                    break;
-                case 4:
-                    sensor = 4;
-                    Log.d(TAG, "receiveBTMessage: sensor 4");
-                    break;
-                case 5:
-                    sensor = 5;
-                    Log.d(TAG, "receiveBTMessage: sensor 5");
-                    break;
-            }
-
-            switch (message[2]&0b00000111){ // sensor zone // 40 - 20 groen // oranje // rood //
-                case 1: //zone 1 (10 cm)
-                    updateSensor(R.color.RED,sensor);
-                    Log.d(TAG, "receiveBTMessage: sensor "+ sensor + " Red");
-                    break;
-                case 2: //zone 2 (10 - 30 cm)
-                    updateSensor(R.color.ORANGE,sensor);
-                    Log.d(TAG, "receiveBTMessage: sensor "+ sensor + " Orange");
-                    break;
-                case 3: //zone 3 (30 -50)
-                    updateSensor(R.color.YELLOW,sensor);
-                    Log.d(TAG, "receiveBTMessage: sensor "+ sensor + " Yellow");
-                    break;
-                case 4: //zone 4 // 50<
-                    updateSensor(R.color.GREEN,sensor);
-                    Log.d(TAG, "receiveBTMessage: sensor "+ sensor + " Green");
-                    break;
-                case 5: //zone 5 not used
-                    break;
-            }
-
-            //TODO richting blokeren waar rood wordt gedetecteerd
-
-            switch (message[2]>>4){ // direction
-                case 0: // halt
-                    //TODO
-                    break;
-                case 1: // links
-                    switch (degree){        // check the current direction and change it with a new direction
-                        case 0:
-                            degree = 270;
-                            break;
-                        case 45:
-                            degree = 315;
-                            break;
-                        case 90:
-                            degree = 0;
-                            break;
-                        case 135:
-                            degree = 45;
-                            break;
-                        case 180:
-                            degree = 90;
-                            break;
-                        case 225:
-                            degree = 135;
-                            break;
-                        case 270:
-                            degree = 180;
-                            break;
-                        case 315:
-                            degree = 225;
-                            break;
-                    }
-                    break;
-                case 2: // vooruit links
-                    //TODO
-                    break;
-                case 3: // vooruit
-                    if(Rdrive && Ldrive){ //TODO
-                        switch (degree){
-                            case 0:
-                                // add to y
-                                coords[Y][coordnumber] += message_distance;
-                                coordnumber++;
-                                break;
-                            case 45:
-                                // add to x and y //TODO
-                                break;
-                            case 90:
-                                // add to x
-                                coords[X][coordnumber] += message_distance;
-                                coordnumber++;
-                                break;
-                            case 135:
-                                // min to y and add to x //TODO
-                                break;
-                            case 180:
-                                coords[Y][coordnumber] += -message_distance;
-                                coordnumber++;
-                                // min to y
-                                break;
-                            case 225:
-                                // min to x and y //TODO
-                                break;
-                            case 270:
-                                // min to x
-                                coords[X][coordnumber] += -message_distance;
-                                coordnumber++;
-                                break;
-                            case 315:
-                                // min to x and add to y //TODO
-                                break;
-                        }
-                    }
-                    break;
-                case 4: // vooruit rechts
-                    //TODO
-                    break;
-                case 5: // rechts
-                    switch (degree){
-                        case 0:
-                            degree = 90;
-                            break;
-                        case 45:
-                            degree = 135;
-                            break;
-                        case 90:
-                            degree = 180;
-                            break;
-                        case 135:
-                            degree = 225;
-                            break;
-                        case 180:
-                            degree = 270;
-                            break;
-                        case 225:
-                            degree = 315;
-                            break;
-                        case 270:
-                            degree = 0;
-                            break;
-                        case 315:
-                            degree = 45;
-                            break;
-                    }
-                    break;
-                case 6: // achteruit rechts
-                    //TODO
-                    break;
-                case 7: // achteruit
-                    if(Rdrive && Ldrive){ //TODO
-                        switch (degree){
-                            case 0:
-                                // min to y
-                                coords[Y][coordnumber] += -message_distance;
-                                coordnumber++;
-                                break;
-                            case 45:
-                                // min to x and y //TODO
-                                break;
-                            case 90:
-                                // min to x
-                                coords[X][coordnumber] += -message_distance;
-                                coordnumber++;
-                                break;
-                            case 135:
-                                // add to y and min to x //TODO
-                                break;
-                            case 180:
-                                // add to y
-                                coords[Y][coordnumber] += message_distance;
-                                coordnumber++;
-                                break;
-                            case 225:
-                                // add to x and y //TODO
-                                break;
-                            case 270:
-                                coords[X][coordnumber] += -message_distance;
-                                coordnumber++;
-                                break;
-                            case 315:
-                                // add to x and min to y //TODO
-                                break;
-                        }
-                    }
-                    break;
-                case 8: // achteruit links
-                        //TODO
-                    break;
-            }
-            if(run){
-                if (ConnectTask.mTcpClient != null) {
-                    ConnectTask.mTcpClient.sendMessage(coords[X][coordnumber]+","+coords[Y][coordnumber]+"<DP>");
-                }
-            }
-        }
-        /*Log.d(TAG, "receiveBTMessage: empty received message");
-        for(int i = 0; i<message.length;i++){
-            message[i]=0;
-        }*/
     }
 
     public static void BTON(boolean state){ // updates the BTConnected image and if bluetooth connected it starts the send thread

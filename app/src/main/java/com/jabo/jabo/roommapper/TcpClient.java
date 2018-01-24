@@ -10,6 +10,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 
 /**
@@ -17,6 +18,8 @@ import java.net.Socket;
  */
 
 public class TcpClient {
+
+    private String TAG = "TcpClient";
 
     public static String SERVER_IP = "192.168.101.11"; //server IP address
     public static final int SERVER_PORT = 11000;
@@ -79,15 +82,19 @@ public class TcpClient {
         mRun = true;
         Socket socket = null;
         String connected = "false";
+        Log.d(TAG, "run:");
         try {
             //here you must put your computer's IP address.
-            InetAddress serverAddr = InetAddress.getByName(SERVER_IP);
+            //InetAddress serverAddr = InetAddress.getByName(SERVER_IP);
+            Log.d(TAG, "run: server ip = " + SERVER_IP);
 
-            Log.d("TCP Client", "C: Connecting...");
+            Log.d(TAG, "C: Connecting...");
 
             //create a socket to make the connection with the server
             try {
-                socket = new Socket(serverAddr, SERVER_PORT);
+                socket = new Socket();
+                socket.connect(new InetSocketAddress(SERVER_IP, SERVER_PORT), 10000);
+                Log.d(TAG, "run: socket: "+ socket.getInetAddress());
             }
             catch (Exception e){
                 Log.e("Socket","Failed "+e);
@@ -141,6 +148,7 @@ public class TcpClient {
             }
 
         } catch (Exception e) {
+            Log.e(TAG, "run: ",e );
             return;
         }
 

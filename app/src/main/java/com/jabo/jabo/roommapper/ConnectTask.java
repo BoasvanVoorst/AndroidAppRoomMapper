@@ -1,10 +1,12 @@
 package com.jabo.jabo.roommapper;
 
 import android.os.AsyncTask;
+import android.util.Log;
 
 public class ConnectTask extends AsyncTask<String, String, TcpClient> {
     public static TcpClient mTcpClient;
     public static String[] Coords;
+    private String TAG = "ConnectTask";
     @Override
     protected TcpClient doInBackground(String... message) {
 
@@ -15,7 +17,7 @@ public class ConnectTask extends AsyncTask<String, String, TcpClient> {
                 publishProgress(message);
             }
         });
-
+        Log.d(TAG, "doInBackground: mTcpClient started");
         mTcpClient.run();
 
         return null;

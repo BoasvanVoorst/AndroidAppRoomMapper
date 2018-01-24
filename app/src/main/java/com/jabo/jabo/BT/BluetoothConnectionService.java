@@ -7,40 +7,27 @@ import android.bluetooth.BluetoothServerSocket;
 import android.bluetooth.BluetoothSocket;
 import android.content.Context;
 import android.graphics.Color;
-import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.jabo.jabo.roommapper.ConnectTask;
 import com.jabo.jabo.roommapper.ControlPage;
-import com.jabo.jabo.roommapper.R;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.nio.charset.Charset;
-import java.sql.Time;
-import java.util.ArrayList;
-import java.util.ResourceBundle;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import static com.google.android.gms.internal.zzagz.runOnUiThread;
 import static com.jabo.jabo.roommapper.ControlPage.updateSensor;
-import static java.lang.System.currentTimeMillis;
-
-/**
- * Created by User on 12/21/2016.
- */
 
 public class BluetoothConnectionService {
-    private static final String TAG = "BluetoothConnectionServ";
+    private static final String TAG = "BluetoothConnectionServ"; // debug tag
 
-    private static final String appName = "JaBo";
+    private static final String appName = "JaBo";   // appname for connection
 
-    private static final UUID MY_UUID_INSECURE = UUID.fromString("00001101-0000-1000-8000-00805f9b34fb");
+    private static final UUID MY_UUID_INSECURE = UUID.fromString("00001101-0000-1000-8000-00805f9b34fb"); // application uuid
 
     private final BluetoothAdapter mBluetoothAdapter;
     Context mContext;
@@ -57,8 +44,8 @@ public class BluetoothConnectionService {
 
     public BluetoothConnectionService(Context context) {
         mContext = context;
-        mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        start();
+        mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter(); // gets the bluetooth adapter
+        start();    // starts application
     }
 
 
@@ -105,7 +92,7 @@ public class BluetoothConnectionService {
                 Log.e(TAG, "AcceptThread: IOException: " + e.getMessage() );
             }
 
-            //talk about this is in the 3rd
+            // if the socket is created then do start the connected thread
             if(socket != null){
                 connected(socket,mmDevice);
             }
@@ -113,6 +100,7 @@ public class BluetoothConnectionService {
             Log.i(TAG, "END mAcceptThread ");
         }
 
+        // cancels the thread
         public void cancel() {
             Log.d(TAG, "cancel: Canceling AcceptThread.");
             try {
@@ -162,6 +150,7 @@ public class BluetoothConnectionService {
                 // This is a blocking call and will only return on a
                 // successful connection or an exception
                 mmSocket.connect();
+                // updates the bluetooth image on ui
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -178,6 +167,8 @@ public class BluetoothConnectionService {
                 } catch (IOException e1) {
                     Log.e(TAG, "mConnectThread: run: Unable to close connection in socket " + e1.getMessage());
                 }
+
+                // updates the bluetooth image on ui
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -187,7 +178,6 @@ public class BluetoothConnectionService {
                 Log.d(TAG, "run: ConnectThread: Could not connect to UUID: " + MY_UUID_INSECURE );
             }
 
-            //will talk about this in the 3rd video
             connected(mmSocket,mmDevice);
         }
         public void cancel() {
@@ -280,9 +270,10 @@ public class BluetoothConnectionService {
             int cDegree = 0;
             int X = 1;
             int Y = 0;
-            int cX = 0;
-            int cY = 0;
-            int stapgrote = 1; // in cm
+            double cX = 0;
+            double cY = 0;
+            double stapgrote = 1; // in cm
+            double diagonalExtra = 0.4;
             Lock l = new ReentrantLock();
 
             // Keep listening to the InputStream until an exception occurs
@@ -300,12 +291,16 @@ public class BluetoothConnectionService {
                                 break;
                             }
                         }
+                        if(bytes >= 100){
+                            bytes = 0;
+                        }
                         for (int i = 0; i < bytes; i++) {
                             newbuffer[count] = buffer[i];
                             count++;
                         }
                         if (count > 2) {
                             if (newbuffer[0] == -81) {//startmessage
+                                Log.d(TAG, "run: message received and started");
                                 final int _sensor = sensor;
 
                                 //region engine
@@ -409,68 +404,162 @@ public class BluetoothConnectionService {
 
                                 if ((newbuffer[1] & 0b01000000) == 0b01000000) {
                                     EngineL = true;
+                                    Log.d(TAG, "engine: EngineL on");
                                 }
+                                else
+                                    Log.d(TAG, "engine: EngineL off");
                                 if ((newbuffer[1] & 0b00100000) == 0b00100000) {
                                     EngineR = true;
+                                    Log.d(TAG, "engine: EngineR on");
                                 }
+                                else Log.d(TAG, "engine: EngineR off");
 
                                 if (EngineL && EngineR) {// if both engines are on
                                     //forward or backward
+                                    Log.d(TAG, "run: direction = " +ControlPage.direction[0]);
                                     switch (cDegree){
                                         case 0:
                                             if(ControlPage.direction[0] == 3 ){ // Vooruit
                                                 // add to Y
+                                                cY += stapgrote;
+                                                if (ConnectTask.mTcpClient != null && ControlPage.run) {
+                                                    ConnectTask.mTcpClient.sendMessage(cX+","+cY+"<DP>");
+                                                    Log.d(TAG, "run: sendMessage to server: "+ cX+","+cY+"<DP>");
+                                                }
                                             } else if (ControlPage.direction[0] == 7){ // Achteruit
                                                 // min from Y
+                                                cY -= stapgrote;
+                                                if (ConnectTask.mTcpClient != null && ControlPage.run) {
+                                                    ConnectTask.mTcpClient.sendMessage(cX+","+cY+"<DP>");
+                                                    Log.d(TAG, "run: sendMessage to server: "+ cX+","+cY+"<DP>");
+                                                }
                                             }
                                             break;
                                         case 45:
                                             if(ControlPage.direction[0] == 3 ){ // Vooruit
                                                 // add to X and Y
+                                                cX += (stapgrote + diagonalExtra);
+                                                cY += (stapgrote + diagonalExtra);
+                                                if (ConnectTask.mTcpClient != null && ControlPage.run) {
+                                                    ConnectTask.mTcpClient.sendMessage(cX+","+cY+"<DP>");
+                                                    Log.d(TAG, "run: sendMessage to server: "+ cX+","+cY+"<DP>");
+                                                }
                                             } else if (ControlPage.direction[0] == 7){ // Achteruit
                                                 // min from X and Y
+                                                cX -= (stapgrote + diagonalExtra);
+                                                cY -= (stapgrote + diagonalExtra);
+                                                if (ConnectTask.mTcpClient != null && ControlPage.run) {
+                                                    ConnectTask.mTcpClient.sendMessage(cX+","+cY+"<DP>");
+                                                    Log.d(TAG, "run: sendMessage to server: "+ cX+","+cY+"<DP>");
+                                                }
                                             }
                                             break;
                                         case 90:
                                             if(ControlPage.direction[0] == 3 ){ // Vooruit
                                                 // add to X
+                                                cX += stapgrote;
+                                                if (ConnectTask.mTcpClient != null && ControlPage.run) {
+                                                    ConnectTask.mTcpClient.sendMessage(cX+","+cY+"<DP>");
+                                                    Log.d(TAG, "run: sendMessage to server: "+ cX+","+cY+"<DP>");
+                                                }
                                             } else if (ControlPage.direction[0] == 7){ // Achteruit
                                                 // min from X
+                                                cX -= stapgrote;
+                                                if (ConnectTask.mTcpClient != null && ControlPage.run) {
+                                                    ConnectTask.mTcpClient.sendMessage(cX+","+cY+"<DP>");
+                                                    Log.d(TAG, "run: sendMessage to server: "+ cX+","+cY+"<DP>");
+                                                }
                                             }
                                             break;
                                         case 135:
                                             if(ControlPage.direction[0] == 3 ){ // Vooruit
                                                 // add X and min from Y
+                                                cX += (stapgrote + diagonalExtra);
+                                                cY -= (stapgrote + diagonalExtra);
+                                                if (ConnectTask.mTcpClient != null && ControlPage.run) {
+                                                    ConnectTask.mTcpClient.sendMessage(cX+","+cY+"<DP>");
+                                                    Log.d(TAG, "run: sendMessage to server: "+ cX+","+cY+"<DP>");
+                                                }
                                             } else if (ControlPage.direction[0] == 7){ // Achteruit
                                                 // min from X and add to Y
+                                                cX -= (stapgrote + diagonalExtra);
+                                                cX += (stapgrote + diagonalExtra);
+                                                if (ConnectTask.mTcpClient != null && ControlPage.run) {
+                                                    ConnectTask.mTcpClient.sendMessage(cX+","+cY+"<DP>");
+                                                    Log.d(TAG, "run: sendMessage to server: "+ cX+","+cY+"<DP>");
+                                                }
                                             }
                                             break;
                                         case 180:
                                             if(ControlPage.direction[0] == 3 ){ // Vooruit
                                                 // min from Y
+                                                cY -= stapgrote;
+                                                if (ConnectTask.mTcpClient != null && ControlPage.run) {
+                                                    ConnectTask.mTcpClient.sendMessage(cX+","+cY+"<DP>");
+                                                    Log.d(TAG, "run: sendMessage to server: "+ cX+","+cY+"<DP>");
+                                                }
                                             } else if (ControlPage.direction[0] == 7){ // Achteruit
                                                 // add to Y
+                                                cY += stapgrote;
+                                                if (ConnectTask.mTcpClient != null && ControlPage.run) {
+                                                    ConnectTask.mTcpClient.sendMessage(cX+","+cY+"<DP>");
+                                                    Log.d(TAG, "run: sendMessage to server: "+ cX+","+cY+"<DP>");
+                                                }
                                             }
                                             break;
                                         case 225:
                                             if(ControlPage.direction[0] == 3 ){ // Vooruit
                                                 // min from Y and min from X
+                                                cX -= (stapgrote + diagonalExtra);
+                                                cY -= (stapgrote + diagonalExtra);
+                                                if (ConnectTask.mTcpClient != null && ControlPage.run) {
+                                                    ConnectTask.mTcpClient.sendMessage(cX+","+cY+"<DP>");
+                                                    Log.d(TAG, "run: sendMessage to server: "+ cX+","+cY+"<DP>");
+                                                }
                                             } else if (ControlPage.direction[0] == 7){ // Achteruit
                                                 // add to Y and add to X
+                                                cX += (stapgrote + diagonalExtra);
+                                                cY += (stapgrote + diagonalExtra);
+                                                if (ConnectTask.mTcpClient != null && ControlPage.run) {
+                                                    ConnectTask.mTcpClient.sendMessage(cX+","+cY+"<DP>");
+                                                    Log.d(TAG, "run: sendMessage to server: "+ cX+","+cY+"<DP>");
+                                                }
                                             }
                                             break;
                                         case 270:
                                             if(ControlPage.direction[0] == 3 ){ // Vooruit
                                                 // min from X
+                                                cX -= stapgrote;
+                                                if (ConnectTask.mTcpClient != null && ControlPage.run) {
+                                                    ConnectTask.mTcpClient.sendMessage(cX+","+cY+"<DP>");
+                                                    Log.d(TAG, "run: sendMessage to server: "+ cX+","+cY+"<DP>");
+                                                }
                                             } else if (ControlPage.direction[0] == 7){ // Achteruit
                                                 // add to X
+                                                cX += stapgrote;
+                                                if (ConnectTask.mTcpClient != null && ControlPage.run) {
+                                                    ConnectTask.mTcpClient.sendMessage(cX+","+cY+"<DP>");
+                                                    Log.d(TAG, "run: sendMessage to server: "+ cX+","+cY+"<DP>");
+                                                }
                                             }
                                             break;
                                         case 315:
                                             if(ControlPage.direction[0] == 3 ){ // Vooruit
                                                 // min from X and add to Y
+                                                cX -= (stapgrote + diagonalExtra);
+                                                cY += (stapgrote + diagonalExtra);
+                                                if (ConnectTask.mTcpClient != null && ControlPage.run) {
+                                                    ConnectTask.mTcpClient.sendMessage(cX+","+cY+"<DP>");
+                                                    Log.d(TAG, "run: sendMessage to server: "+ cX+","+cY+"<DP>");
+                                                }
                                             } else if (ControlPage.direction[0] == 7){ // Achteruit
                                                 // add to X and min from Y
+                                                cX += (stapgrote + diagonalExtra);
+                                                cY -= (stapgrote + diagonalExtra);
+                                                if (ConnectTask.mTcpClient != null && ControlPage.run) {
+                                                    ConnectTask.mTcpClient.sendMessage(cX+","+cY+"<DP>");
+                                                    Log.d(TAG, "run: sendMessage to server: "+ cX+","+cY+"<DP>");
+                                                }
                                             }
                                             break;
                                     }
@@ -489,6 +578,7 @@ public class BluetoothConnectionService {
                                 } else {
 
                                 }
+                                Log.d(TAG, "run: cDegree = "+cDegree);
                                 //endregion
 
                                 // end loop
