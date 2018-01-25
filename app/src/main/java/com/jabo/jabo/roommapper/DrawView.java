@@ -10,15 +10,17 @@ import android.view.View;
 
 public class DrawView extends View {
     String TAG = "DrawView";
+    Paint startpaint = new Paint();
     Paint paint = new Paint();
     Canvas canvas;
-    int[][] coords;
+    float[][] coords;
     int offsetx=0;
     int offsety=0;
 
     private void init() {
         paint.setColor(Color.RED);
         paint.setStrokeWidth(5);
+        startpaint.setColor(Color.GREEN);
     }
 
     public DrawView(Context context) {
@@ -40,9 +42,10 @@ public class DrawView extends View {
     public void onDraw(Canvas canvas) {
         this.canvas = canvas;
         canvas.drawColor(Color.WHITE);
+        canvas.drawCircle(offsetx,offsety,10,startpaint);
         for(int i =0;i<this.coords.length;i++) {
             try{
-                canvas.drawLine((this.coords[i][2]+this.offsetx),(this.coords[i][3]+this.offsety),(this.coords[i][0]+this.offsetx),(this.coords[i][1]+this.offsety),paint);
+                canvas.drawLine((float)(this.coords[i][2]+this.offsetx),(float)(this.coords[i][3]+this.offsety),(float)(this.coords[i][0]+this.offsetx),(float)(this.coords[i][1]+this.offsety),paint);
             }
             catch (Exception e){
 
@@ -50,7 +53,7 @@ public class DrawView extends View {
         }
     }
 
-    public void update(int[][] coords,int offsetx,int offsety){
+    public void update(float[][] coords,int offsetx,int offsety){
         this.coords = coords;
         this.offsetx = offsetx;
         this.offsety = offsety;

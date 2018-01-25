@@ -126,7 +126,7 @@
         android:layout_marginTop="4dp"
         app:layout_constraintStart_toStartOf="@+id/voertuigIMG"
         app:layout_constraintTop_toTopOf="@+id/voertuigIMG"
-        app:srcCompat="@android:color/holo_green_dark" />
+        app:srcCompat="@color/GREEN" />
 
     <ImageView
         android:id="@+id/sensor3"
@@ -136,7 +136,7 @@
         android:layout_marginTop="4dp"
         app:layout_constraintEnd_toEndOf="@+id/voertuigIMG"
         app:layout_constraintTop_toTopOf="@+id/voertuigIMG"
-        app:srcCompat="@android:color/holo_green_dark" />
+        app:srcCompat="@color/GREEN" />
 
     <ImageView
         android:id="@+id/sensor4"
@@ -146,7 +146,7 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintStart_toEndOf="@+id/sensor5"
         app:layout_constraintTop_toTopOf="@+id/voertuigIMG"
-        app:srcCompat="@android:color/holo_green_dark" />
+        app:srcCompat="@color/GREEN" />
 
     <ImageView
         android:id="@+id/sensor1"
@@ -156,7 +156,7 @@
         android:layout_marginStart="24dp"
         app:layout_constraintBottom_toBottomOf="@+id/voertuigIMG"
         app:layout_constraintStart_toStartOf="@+id/voertuigIMG"
-        app:srcCompat="@android:color/holo_green_dark" />
+        app:srcCompat="@color/GREEN" />
 
     <ImageView
         android:id="@+id/sensor2"
@@ -166,7 +166,7 @@
         android:layout_marginEnd="32dp"
         app:layout_constraintBottom_toBottomOf="@+id/voertuigIMG"
         app:layout_constraintEnd_toEndOf="@+id/voertuigIMG"
-        app:srcCompat="@android:color/holo_green_dark" />
+        app:srcCompat="@color/GREEN" />
 
     <ImageView
         android:id="@+id/voertuigIMG"

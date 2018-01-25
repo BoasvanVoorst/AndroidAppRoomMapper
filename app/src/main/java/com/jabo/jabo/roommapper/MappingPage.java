@@ -14,7 +14,7 @@ public class MappingPage extends AppCompatActivity {
     final static String TAG = "MappingPage";
     static DrawView drawView;
     static int currentCoords = 0;
-    static int[][] coords = new int[1000][4];
+    static float[][] coords = new float[10000][4];
     private static float offsetx;
     private static float offsety;
     @Override
@@ -72,22 +72,24 @@ public class MappingPage extends AppCompatActivity {
         drawView.update(coords,Math.round(offsetx),Math.round(offsety));
     }
 
-    static int prev_x = 0;
-    static int prev_y = 0;
+    static float prev_x = 0;
+    static float prev_y = 0;
     public static void update(String Message){
         Message = Message.replace("File already Exists","");
         Message = Message.replace("message received","");
         Message = Message.replace("received message","");
         String[] xy = Message.split(",");
-        if(!xy[0].equalsIgnoreCase("") && !xy[1].equalsIgnoreCase("")) {
-            int x = Integer.parseInt(xy[0]);
-            int y = Integer.parseInt(xy[1]);
-            coords[currentCoords][0] = x;
-            coords[currentCoords][1] = y;
-            coords[currentCoords][2] = prev_x;
-            coords[currentCoords][3] = prev_y;
-            prev_x = x;
-            prev_y = y;
+        if(xy.length>1){
+            if(!xy[0].equalsIgnoreCase("") && !xy[1].equalsIgnoreCase("")) {
+                float x = Float.parseFloat(xy[0]);
+                float y = Float.parseFloat(xy[1]);
+                coords[currentCoords][0] = x;
+                coords[currentCoords][1] = y;
+                coords[currentCoords][2] = prev_x;
+                coords[currentCoords][3] = prev_y;
+                prev_x = x;
+                prev_y = y;
+            }
         }
         drawView.update(coords,Math.round(offsetx),Math.round(offsety));
         currentCoords++;

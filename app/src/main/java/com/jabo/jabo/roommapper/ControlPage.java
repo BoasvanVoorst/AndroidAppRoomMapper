@@ -69,7 +69,7 @@ public class ControlPage extends AppCompatActivity/* implements AdapterView.OnIt
                 Log.d(TAG, "run: sendThread started");
                 while(sending) {
                     try {
-                        Log.d(TAG, "run: direction send: "+direction[0]);
+                        //Log.d(TAG, "run: direction send: "+direction[0]);
                         mBluetoothConnection.write(direction);
                         try {
                             sendThread.sleep(25);
@@ -361,6 +361,7 @@ public class ControlPage extends AppCompatActivity/* implements AdapterView.OnIt
             run = true;
             popup("started");
             RoomName.setEnabled(false);
+            mBluetoothConnection.zero();
             final String _input = input;
             new Thread(new Runnable() {
                 @Override
@@ -414,7 +415,7 @@ public class ControlPage extends AppCompatActivity/* implements AdapterView.OnIt
         String TAG = "updateSensor";
         if (wich_sensor != 0){
             result = wich_sensor -1;
-            Log.d(TAG, "updateSensor: sensor: "+result);
+            //Log.d(TAG, "updateSensor: sensor: "+result);
             Sensors[result].setColorFilter(color);
         }
     }
@@ -515,6 +516,7 @@ public class ControlPage extends AppCompatActivity/* implements AdapterView.OnIt
         mBluetoothConnection.cancel();
         sending = false;
         sendThread = null;
+        run = false;
         try {
             unregisterReceiver(mBroadcastReceiver1);
         }

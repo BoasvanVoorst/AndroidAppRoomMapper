@@ -15,6 +15,7 @@ public class ConnectTask extends AsyncTask<String, String, TcpClient> {
             //here the messageReceived method is implemented
             public void messageReceived(String message) {
                 publishProgress(message);
+                Log.d(TAG, "messageReceived");
             }
         });
         Log.d(TAG, "doInBackground: mTcpClient started");
